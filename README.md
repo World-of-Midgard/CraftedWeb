@@ -3,7 +3,8 @@
 A Content Management System for TrinityCore based emulators.
 
 Project maintained and owned by EmuDevs.com.
-Original designer: CrafteDev
+
+Original designer: CraftedDev
 
 
 **Please note that this is a freeware CMS.**
@@ -101,7 +102,7 @@ If somehow, the automatic installation does not work. Try this one.
    
    
 * Q: I miss a function, or I've found a serious or minor bug.
-* A: Report any problems you may find at the Ac-Web forum thread. I will read all posts and do my best with the time and effort available to me.
+* A: Report any problems you may find at EmuDevs.com. I will read all posts and do my best with the time and effort available to me.
 
 
 * Q: What cores does the site support?
