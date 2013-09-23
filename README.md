@@ -3,7 +3,8 @@
 A Content Management System for TrinityCore based emulators.
 
 Project maintained and owned by EmuDevs.com.
-Original designer: CrafteDev
+
+Original designer: CraftedDev
 
 
 **Please note that this is a freeware CMS.**
@@ -24,7 +25,8 @@ But you may NOT:
 
 2. (Optional)Create a new database ON THE SAME DATABASE AS YOUR 'auth'. Name it for example: craftedweb. If you do not create one now, the installer will do it for you.
 
-3. CHMOD the 'error.log','/install/sql/CraftedWeb_Base.sql','/includes/configuration.php' and lastly, all files found in '/install/sql/updates/'
+3. CHMOD 777 the 'error.log','/install/sql/CraftedWeb_Base.sql','/includes/configuration.php' and all files found in '/install/sql/updates/'
+
 	How to CHMOD on FileZilla: http://www.phpjunkyard.com/tutorials/ftp-chmod-tutorial.php
 
 4. Open up your website. You should be redirected to the Installer. Follow the instructions.
@@ -101,7 +103,7 @@ If somehow, the automatic installation does not work. Try this one.
    
    
 * Q: I miss a function, or I've found a serious or minor bug.
-* A: Report any problems you may find at the Ac-Web forum thread. I will read all posts and do my best with the time and effort available to me.
+* A: Report any problems you may find at EmuDevs.com. I will read all posts and do my best with the time and effort available to me.
 
 
 * Q: What cores does the site support?
