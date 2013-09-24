@@ -54,7 +54,7 @@ elseif($_POST['function']=='edit')
 	{
 		mysql_query("UPDATE news SET title='".$title."', author='".$author."', body='".$content."' WHERE id='".$id."'");
 		$server->logThis("Updated news post with ID: <b>".$id."</b>");
-		return;
+        die("success");
 	}
 }
 #############################

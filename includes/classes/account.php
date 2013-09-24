@@ -59,6 +59,7 @@ class account {
 					   header("Location: ".$last_page);
 					else
 					   header("Location: index.php");
+                    exit;
 				}
 			}
 
@@ -251,7 +252,10 @@ class account {
 	public static function isLoggedIn()
 	{
 		if (isset($_SESSION['cw_user']))
+        {
 			header("Location: ?p=account");
+            exit;
+        }
 	}
 
 
@@ -261,13 +265,19 @@ class account {
 	public static function isNotLoggedIn()
 	{
 		if (!isset($_SESSION['cw_user']))
-			header("Location: ?p=login&r=".$_SERVER['REQUEST_URI']);
+        {
+	        header("Location: ?p=login&r=".$_SERVER['REQUEST_URI']);
+            exit;
+        }
 	}
 
 	public static function isNotGmLoggedIn()
 	{
 		if (!isset($_SESSION['cw_gmlevel']))
+        {
 			header("Location: ?p=home");
+            exit;
+        }
 	}
 
 
@@ -283,20 +293,26 @@ class account {
 		if (mysql_num_rows($result)>0)
 		{
 			$row = mysql_fetch_assoc($result);
-			if($row['bandate'] > $row['unbandate'])
-				$duration = 'Infinite';
+            if($row['bandate'] >= $row['unbandate'] && $row['unbandate'] < time())
+            {
+                return '<span class="red_text">Banned<br />
+                Reason: '.$row['banreason'].'<br />
+                Time left: Infinite</span>';
+            }
 			else
 			{
-				$duration = $row['unbandate'] - $row['bandate'];
-				$duration = ($duration / 60)/60;
-				$duration = $duration.' hours';
-			}
-				echo '<span class="yellow_text">Banned<br/>
-					  Reason: '.$row['banreason'].'<br/>
-					  Time left: '.$duration.'</span>';
+                $duration = $row['unbandate'] - time();
+                if ($duration > 0)
+                {
+                    $duration = round(($duration / 60)/60, 2);
+                    $duration = $duration.' hours';
+                    return '<span class="yellow_text">Banned<br/>
+                    Reason: '.$row['banreason'].'<br/>
+                    Time left: '.$duration.'</span>';
+                }
+            }
 		}
-		else
-			echo '<b class="green_text">Active</b>';
+        return '<b class="green_text">Active</b>';
 	}
 
 
@@ -725,4 +741,3 @@ class account {
 			mysql_query("INSERT INTO user_log VALUES(NULL,'".$account."','".$service."','".time()."','".$_SERVER['REMOTE_ADDR']."','".$realmid."','".$desc."')");
 	}
 }
-?>

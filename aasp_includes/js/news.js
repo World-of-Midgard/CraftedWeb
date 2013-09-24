@@ -8,7 +8,7 @@ function postNews() {
 	showLoader();
 	$.post("../aasp_includes/scripts/news.php", { function: "post", title: title, author: author, content: content,image: image },
        function(data) {
-			 $("#loading").html(data + "<br/><br/><a href='#' onclick='hideLoader()'>Close</a>"); 
+           $("#loading").html(data + "<br/><br/><a href='#' style='color: black' onclick='hideLoader()'>Close</a>");
 		 
    });
 }

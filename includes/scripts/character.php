@@ -10,12 +10,19 @@
 
 require('../ext_scripts_class_loader.php');
 
+if (!isset($_SESSION['cw_user']))
+    die('Invalid access!');
+
+$acct_id = account::getAccountID($_SESSION['cw_user']);
+
 if($_POST['action']=='unstuck') 
 {
 	$guid = (int)$_POST['guid'];
 	$realm_id = server::getRealmId($_POST['char_db']);
 	connect::connectToRealmDB($realm_id);
-	
+    if (character::isAccountCharacter($guid, $acct_id)==FALSE)
+        die('<b class="red_text">This character does not belong to you!');
+
 	character::unstuck($guid,$_POST['char_db']);
 }	
 
@@ -24,7 +31,9 @@ if($_POST['action']=='revive')
 	$guid = (int)$_POST['guid'];
 	$realm_id = server::getRealmId($_POST['char_db']);
 	connect::connectToRealmDB($realm_id);
-	
+    if (character::isAccountCharacter($guid, $acct_id)==FALSE)
+        die('<b class="red_text">This character does not belong to you!');
+
 	character::revive($guid,$_POST['char_db']);
 }	
 
@@ -75,7 +84,7 @@ if ($_POST['action']=='teleport')
 	
     $realm_id = server::getRealmId($_POST['char_db']);
 	connect::connectToRealmDB($realm_id);
-	$result = mysql_query("SELECT race,account,level,online FROM characters WHERE guid='".$character."'");
+    $result = mysql_query("SELECT race, level, online, name, position_x, position_y, position_z, map FROM characters WHERE guid='".$character."' AND account='{$acct_id}'");
     
 	if (mysql_num_rows($result) == 0)
 		die("<span class='alert'>The character does not exist on that account!</span>");
@@ -86,11 +95,17 @@ if ($_POST['action']=='teleport')
 	
 	if($row['online']==1)
 		die("Please log out before teleporting.");
-	
-	$acct = $row['account'];
+
 	$race = $row['race'];
 	$level = $row['level'];
-	
+
+        $char_name = $row['name'];
+        $char_x = $row['position_x'];
+        $char_y = $row['position_y'];
+        $char_z = $row['position_z'];
+        $char_map = $row['map'];
+        $from = "X: ".$char_x." - Y: ".$char_y." - Z: ".$char_z." - MAP ID: ".$char_map;
+
 	 if($GLOBALS['service']['teleport']['currency']=="vp" && $GLOBALS['service']['teleport']['price']>0) 
 	 {
 		 if(account::hasVP($_SESSION['cw_user'],$GLOBALS['service']['teleport']['price'])==FALSE)
@@ -208,31 +223,20 @@ if ($_POST['action']=='teleport')
 		die("Aborting...<br/><span class='alert'>Your character must be level 68 or higher to teleport to Northrend!</span>");
 
 	if($GLOBALS['service']['teleport']['currency']=="vp")
-		 account::deductVP(account::getAccountID($_SESSION['cw_user']),$GLOBALS['service']['teleport']['price']);
+        account::deductVP($acct_id,$GLOBALS['service']['teleport']['price']);
 	elseif($GLOBALS['service']['teleport']['currency']=="dp")
-		account::deductDP(account::getAccountID($_SESSION['cw_user']),$GLOBALS['service']['teleport']['price']);
+        account::deductDP($acct_id,$GLOBALS['service']['teleport']['price']);
 	
 	connect::connectToRealmDB($realm_id);
-	
-	//get pos x, y etc for the logs.
-	$result = mysql_query("SELECT position_x, position_y, position_z, map FROM characters WHERE guid='".$character."'"); 
-	$pos = mysql_fetch_assoc($result);
-	
-	$char_x = $pos['position_x'];
-	$char_y = $pos['position_y'];
-	$char_z = $pos['position_z'];
-	$char_map = $pos['map'];
-	$from = "X: ".$char_x." - Y: ".$char_y." - Z: ".$char_z." - MAP ID: ".$char_map;
-	
-    mysql_query("UPDATE characters SET position_x = ".$x.", position_y= ".$y.", position_z = ".$z.", map = ".$map." WHERE account = ".$acct." 
-			     AND guid = '".$character."'");
+
+        mysql_query("UPDATE characters SET position_x = ".$x.", position_y= ".$y.", position_z = ".$z.", map = ".$map." WHERE account = ".$acct_id. " AND guid = '".$character."'");
      
 	 if($GLOBALS['service']['teleport']['currency']=="vp")
 		 echo $GLOBALS['service']['teleport']['price']." Vote Points was taken from your account.";
 	 elseif($GLOBALS['service']['teleport']['currency']=="dp")
 		echo $GLOBALS['service']['teleport']['price']." ".$GLOBALS['donation']['coins_name']." was taken from your account.";
-		
-		account::logThis("Teleported ".character::getCharName($character,$realm_id)." to ".$location,'Teleport',$realm_id);
+
+        account::logThis("Teleported ".$char_name." from " . $from . " to ".$location,'Teleport',$realm_id);
 	
 		echo true;
 	}
@@ -244,7 +248,10 @@ if($_POST['action']=='service')
 	$guid = (int)$_POST['guid'];
 	$realm_id = (int)$_POST['realm_id'];
 	$serviceX = mysql_real_escape_string($_POST['service']);
-	
+    connect::connectToRealmDB($realm_id);
+
+    if (character::isAccountCharacter($guid, $acct_id)==FALSE)
+        die('<b class="red_text">This character does not belong to you!');
 	
 	if(character::isOnline($guid)==TRUE) 
 			die('<b class="red_text">Please log out your character before proceeding.');

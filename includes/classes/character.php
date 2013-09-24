@@ -280,8 +280,7 @@ class character {
 	   elseif(in_array($value,$h)) 
 		   return '<img src="styles/global/images/icons/faction/1.gif" />';
   }
-  
-  
+
    public static function getCharName($id,$realm_id) 
    {
 		$id = (int)$id;
@@ -291,5 +290,15 @@ class character {
 		$row = mysql_fetch_assoc($result);
 		return $row['name'];	
 	}
-}	
-?>
+
+    public static function isAccountCharacter($char_guid, $acct_id)
+    {
+        $char_guid = (int)$char_guid;
+        $acct_id = (int)$acct_id;
+        $result = mysql_query("SELECT COUNT('guid') FROM characters WHERE guid='{$char_guid}' AND account = '{$acct_id}'");
+        if (mysql_result($result,0)==0)
+            return FALSE;
+        else
+            return TRUE;
+    }
+}
