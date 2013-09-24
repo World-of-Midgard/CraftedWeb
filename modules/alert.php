@@ -16,5 +16,3 @@ if($alert_enabled == true)
 		echo $alert_message; 
 	echo '</div>';
 }
-
-?>

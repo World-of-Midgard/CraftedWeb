@@ -28,4 +28,3 @@ else
 	 else
 		 echo '<li><a href="'.$row['url'].'">'.$row['title'].'</a></li>';
  }
-?>

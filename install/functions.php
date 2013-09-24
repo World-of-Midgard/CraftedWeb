@@ -65,13 +65,13 @@ function step2()
 		$sql = false;	
 	
 	if($sql==true && $config==true)
-		exit( "Both Configuration file & SQL file is write- & readable. <a href='?st=3'>Click here to continue</a>" );	
+		exit( "Files are writable.<BR /> <a href='?st=3'>Click here to proceed</a>" );
 	if($sql==true && $config==false)
-		exit( "SQL file <i>is</i> readable. Configuration file is <b>NOT</b> writeable. Please check the instructions above." );
+		exit( "SQL file <i>is</i> writable. Configuration file is <b>NOT</b> writeable. Please check the instructions above." );
 	if($sql==false && $config==true)
-		exit( "SQL file is <b>NOT</b> readable. Configuration file <i>is</i> writeable. Please check the instructions above." );	
+		exit( "SQL file is <b>NOT</b> writable. Configuration file <i>is</i> writeable. Please check the instructions above." );
 		
-		exit( "Neither the SQL file or the Configuration file is writeable. Please check the instructions above." );
+		exit( "Files NOT writeable. Please check the instructions above!" );
 		
 }
 
@@ -137,10 +137,7 @@ $config = '<?php
 		exit();
 		
 	#############################
-	## CRAFTEDWEB CONFIG FILE  ##
-	## GENERATION 1            ##
-	## Author:				   ##
-	## Anthony @ CraftedDev    ##
+	## CONFIG FILE             ##
 	## ------------------------##
 	## Please note that:       ##
 	## true = Enabled          ##

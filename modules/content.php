@@ -40,5 +40,3 @@
 	else 
 	  include('pages/404.php');
  }
-				 
-?>

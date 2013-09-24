@@ -14,4 +14,3 @@
 		 buildError("<b>Configuration file error.</b>Neither the slideshow or the news are displayed, the homepage will be empty.");
 		 echo "Seems like the homepage was empty!";
 	 }
-?>

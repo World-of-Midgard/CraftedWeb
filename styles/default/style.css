@@ -107,9 +107,13 @@ textarea {
 	width: 430px;
 }
 
-#logo {margin-top: 40px;}
+#logo {
+    margin-top: 40px;
+}
 
-#logo:hover { opacity: 0.85;}
+#logo:hover {
+    opacity: 0.85;
+}
 
 /*Nav Menu*/
 .cssmenu ul,

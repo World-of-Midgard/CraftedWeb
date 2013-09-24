@@ -13,12 +13,12 @@
 <html lang="en">
 <head>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-	<title>CraftedWeb Installer</title>
+	<title>CW Installer</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" href="install.css" type="text/css" media="screen" />
 </head>
 <body>
-</center>
+<center>
 <div id="main_box">
 	<h1>Installation &raquo; Step <?php echo $step; ?> (<?php echo $steps[$step]; ?>)</h1>
 
@@ -30,7 +30,7 @@
         </div>
 	</div>
 </div>
-&copy 2011-2012 <a href="http://nomsoftware.com/">Nomsoft</a>
+&copy 2013 <a href="http://emudevs.com/">www.EmuDevs.com</a>
 </center>
 </body>
 </html>
