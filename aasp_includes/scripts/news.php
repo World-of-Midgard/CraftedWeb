@@ -29,6 +29,10 @@ if($_POST['function']=='post')
 	
 	$server->logThis("Posted a news post");
 	echo "Successfully posted news.";
+?>
+    <META http-equiv="refresh" content="0;URL=?p=news&s=manage">
+<?php
+
 }
 ################################
 elseif($_POST['function']=='delete') 
@@ -54,7 +58,7 @@ elseif($_POST['function']=='edit')
 	{
 		mysql_query("UPDATE news SET title='".$title."', author='".$author."', body='".$content."' WHERE id='".$id."'");
 		$server->logThis("Updated news post with ID: <b>".$id."</b>");
-        die("success");
+        die();
 	}
 }
 #############################
