@@ -1,17 +1,9 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
- 
-#################
-# Not finished. #
-#################
 
-?>
+------------- Ignore, this is being removed. --------------
+ 
+/*
 <div class='box_two_title'>Support</div>
 <?php exit('This page was never completed.'); ?>
 <table class='splashWebformLink'>
@@ -31,4 +23,5 @@
 <?php 
 if (isset($_GET['do']) && $_GET['do']=="email")
 	support::loadEmailForm();
-?>      
+?>
+ */

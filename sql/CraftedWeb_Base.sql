@@ -1,10 +1,5 @@
 /*
-CraftedWeb Base SQL Dump
-
-Exported with:
-	SQLyog Ultimate v8.8 
-	MySQL - 5.0.77 : Database - CraftedWeb
-*********************************************************************
+CraftedWeb Base SQL
 */
 
 CREATE TABLE IF NOT EXISTS `account_data` (
@@ -78,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `news` (
 ) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
 
-insert  into `news`(`id`,`title`,`body`,`author`,`image`,`date`) values (1,'Welcome to Your New Website!','If you\'re seing this message, most likely, the CraftedWeb database has been installed successfully. \n\nNow, check out your configuration file to customize your website even further if you havent done that already. You may edit this news post by logging onto your Admin panel. \n\nWe sincerely hope that you will enjoy our work. Thanks!','CraftedDev','','2012-01-30 22:40:07');
+insert  into `news`(`id`,`title`,`body`,`author`,`image`,`date`) values (1,'Thanks for using Crafted Web!','You can now begin setting up your site in the AdminCP.','Faded','','2014-09-16 22:40:07');
 
 
 CREATE TABLE IF NOT EXISTS `news_comments` (
@@ -174,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `site_links` (
   UNIQUE KEY `position` (`position`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
 
-insert  into `site_links`(`position`,`title`,`url`,`shownWhen`) values (1,'Home','?p=home','always'),(2,'Register','?p=register','notlogged'),(3,'My Account','?p=account','logged'),(4,'Vote','?p=vote','logged'),(5,'Donate','?p=donate','always'),(6,'Forum','/forum/','always');
+insert  into `site_links`(`position`,`title`,`url`,`shownWhen`) values (1,'Home','?p=home','always'),(2,'Register','?p=register','notlogged'),(3,'My Account','?p=account','logged'),(4,'Vote','?p=vote','logged'),(5,'Donate','?p=donate','always');
 
 CREATE TABLE IF NOT EXISTS `slider_images` (
   `position` int(10) NOT NULL auto_increment,
@@ -183,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `slider_images` (
   UNIQUE KEY `position` (`position`)
 ) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 
-insert  into `slider_images`(`position`,`path`,`link`) values (1,'styles/global/slideshow/images/1.jpg',''),(2,'styles/global/slideshow/images/2.jpg','');
+insert  into `slider_images`(`position`,`path`,`link`) values (1,'styles/global/slideshow/images/1.jpg',''),(2,'styles/global/slideshow/images/2.jpg',''),(3,'styles/global/slideshow/images/3.jpg',''),(4,'styles/global/slideshow/images/4.jpg','');
 
 CREATE TABLE IF NOT EXISTS `template` (
   `id` int(32) unsigned NOT NULL auto_increment,

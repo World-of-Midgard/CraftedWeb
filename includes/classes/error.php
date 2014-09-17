@@ -1,15 +1,11 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
- 
-function buildError($error,$num) 
+
+-----------To be removed.----------
+
+function //buildError($error,$num)
 {
-	if ($GLOBALS['useDebug']==false) 
+	if ($GLOBALS['useDebug'] == false)
 		log_error($error,$num);
 	else 
 		errors($error,$num);
@@ -19,27 +15,24 @@ function errors($error,$num)
 {
 	log_error(strip_tags($error),$num);
 	die("<center><b>Website error</b>  <br/>
-		The website script encountered an error and died. <br/><br/>
+		The website encountered an error. <br/><br/>
 		<b>Error message: </b>".$error."  <br/>
-		<b>Error number: </b>".$num."
-		<br/><br/><br/><i>Powered by CraftedWeb
-		<br/><font size='-2'>Professionally developed with love.</font></i></center>
-		");
+		<b>Error number: </b>".$num."</center>");
 }
 
 function log_error($error,$num) 
 {
- error_log("*[".date("d M Y H:i")."] ".$error, 3, "error.log");
+    error_log("*[".date("d M Y H:i")."] ".$error, 3, "error.log");
 }
 
 function loadCustomErrors() 
 {
-  set_error_handler("customError");   
+    set_error_handler("customError");
 }
 
 function customError($errno, $errstr)
 {
-    if ($errno!=8 && $errno!=2048 && $GLOBALS['useDebug']==TRUE) 
+    if ($errno!=8 && $errno!=2048 && $GLOBALS['useDebug']==true)
           error_log("*[".date("d M Y H:i")."]<i>".$errstr."</i>", 3, "error.log");
 }
-?>
+*/

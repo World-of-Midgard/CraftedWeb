@@ -1,36 +1,52 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
-?>
-<?php $page = new page; 
-$server = new server;
-$account = new account;
-?> 
-<div class="box_right_title">Donation Shop logs</div>
-<?php $result = mysql_query("SELECT * FROM shoplog WHERE shop='donate' ORDER BY id DESC LIMIT 10 "); 
-if(mysql_num_rows($result)==0) {
-	echo "Seems like the donation shop log was empty!";
-} else {
-?>
- <input type='text' value='Search...' id="logs_search" onkeyup="searchLog('donate')"><hr/>
-<div id="logs_content">
-<table width="100%">
-        <tr><th>User</th><th>Character</th><th>Realm</th><th>Item</th><th>Date</th></tr>
-        <?php while($row = mysql_fetch_assoc($result)) { ?>
-		<tr class="center">
-            <td><?php echo $account->getAccName($row['account']); ?></td>
-            <td><?php echo $account->getCharName($row['char_id'],$row['realm_id']); ?></td>
-            <td><?php echo $server->getRealmName($row['realm_id']); ?></td>
-            <td><a href="http://<?php echo $GLOBALS['tooltip_href']; ?>item=<?php echo $row['entry']; ?>" title="" target="_blank">
-			<?php echo $server->getItemName($row['entry']); ?></a></td>
-            <td><?php echo $row['date']; ?></td>
-        </tr>	
-		<?php } ?>
-</table>
-</div>
-<?php } ?>
+           ___           __ _           _ __    __     _
+          / __\ __ __ _ / _| |_ ___  __| / / /\ \ \___| |__
+         / / | '__/ _` | |_| __/ _ \/ _` \ \/  \/ / _ \ '_ \
+        / /__| | | (_| |  _| ||  __/ (_| |\  /\  /  __/ |_) |
+        \____/_|  \__,_|_|  \__\___|\__,_| \/  \/ \___|_.__/
+                          --[ Build 1.5 ]--
+                    - coded and revised by Faded -
+
+    CraftedWeb is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    included license for more details.
+
+    Support/FAQ #EmuDevs - http://emudevs.com
+*/
+    $page = new page;
+    $server = new server;
+    $account = new account;
+    $sql = $server->sqli();
+    ?>
+    <div class="box_right_title">Donation Shop logs</div>
+    <?php
+        $result = $sql->query("SELECT * FROM shoplog WHERE shop='donate' ORDER BY id DESC LIMIT 10 ");
+        if(!$result)
+            echo "Seems like the donation shop log was empty!";
+        else
+        {
+    ?>
+     <input type='text' value='Search...' id="logs_search" onkeyup="searchLog('donate')"><hr/>
+    <div id="logs_content">
+    <table width="100%">
+            <tr><th>User</th><th>Character</th><th>Realm</th><th>Item</th><th>Date</th></tr>
+            <?php while($row = mysqli_fetch_assoc($result)) { ?>
+            <tr class="center">
+                <td><?php echo $account->getAccName($row['account']); ?></td>
+                <td><?php echo $account->getCharName($row['char_id'],$row['realm_id']); ?></td>
+                <td><?php echo $server->getRealmName($row['realm_id']); ?></td>
+                <td><a href="http://<?php echo $GLOBALS['tooltip_href']; ?>item=<?php echo $row['entry']; ?>" title="" target="_blank">
+                <?php echo $server->getItemName($row['entry']); ?></a></td>
+                <td><?php echo $row['date']; ?></td>
+            </tr>
+            <?php } ?>
+    </table>
+    </div>
+    <?php } ?>

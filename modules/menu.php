@@ -1,30 +1,39 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
- 
-connect::selectDB('webdb');
-if (!isset($_SESSION['cw_user'])) 
-	$sql = "WHERE shownWhen = 'always' OR shownWhen = 'notlogged'"; 
-else 
-	$sql = "WHERE shownWhen = 'always' OR shownWhen = 'logged'";
-			 		
- $getMenuLinks = mysql_query("SELECT * FROM site_links ".$sql." ORDER BY position ASC");
- if (mysql_num_rows($getMenuLinks)==0) 
- {
-	 buildError("<b>Template error:</b> No menu links was found in the CraftedWeb database!",NULL);
-	 echo "<br/>No menu links was found!";
- }
-		 
- while($row = mysql_fetch_assoc($getMenuLinks)) 
- {
-	 $curr = substr($row['url'],3);
-	 if ($_GET['p']==$curr)
-			 echo '<li><a href="'.$row['url'].'" class="current">'.$row['title'].'</a></li>';
-	 else
-		 echo '<li><a href="'.$row['url'].'">'.$row['title'].'</a></li>';
- }
+           ___           __ _           _ __    __     _
+          / __\ __ __ _ / _| |_ ___  __| / / /\ \ \___| |__
+         / / | '__/ _` | |_| __/ _ \/ _` \ \/  \/ / _ \ '_ \
+        / /__| | | (_| |  _| ||  __/ (_| |\  /\  /  __/ |_) |
+        \____/_|  \__,_|_|  \__\___|\__,_| \/  \/ \___|_.__/
+                          --[ Build 1.5 ]--
+                    - coded and revised by Faded -
+
+    CraftedWeb is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    included license for more details.
+
+    Support/FAQ #EmuDevs - http://emudevs.com
+*/
+
+    $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
+    if (!isset($_SESSION['cw_user']))
+        $query = "WHERE shownWhen='always' OR shownWhen='notlogged'";
+    else
+        $query = "WHERE shownWhen='always' OR shownWhen='logged'";
+
+    $sql->select_db($GLOBALS['connection']['webdb']);
+    $result = $sql->query("SELECT * FROM site_links ". $query ." ORDER BY position ASC") or die("the query fucked up");
+    while($row = mysqli_fetch_assoc($result))
+    {
+        $curr = substr($row['url'] , 3);
+        if ($_GET['p'] == $curr)
+            echo '<li><a href="'.$row['url'].'" class="current">'.$row['title'].'</a></li>';
+        else
+            echo '<li><a href="'.$row['url'].'">'.$row['title'].'</a></li>';
+    }

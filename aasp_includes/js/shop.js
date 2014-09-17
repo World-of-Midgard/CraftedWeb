@@ -103,8 +103,7 @@ function delMultiItemNow(il_from,il_to,quality,shop,type) {
 
 function clearShop(shop) {
 	showLoader();
-	
-	<!-- Remaking the strings to int, due to problems with javascript " & '
+
 	if(shop=="vote") {
 		shop = 1;
 	} 

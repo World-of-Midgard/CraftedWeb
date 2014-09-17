@@ -38,6 +38,7 @@ function editNews(id) {
        });
 	
 }
+
 function editNewsNow(id) {
 	var title = document.getElementById("editnews_title").value;
 	var author = document.getElementById("editnews_author").value;

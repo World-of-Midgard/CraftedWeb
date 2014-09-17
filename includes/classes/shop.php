@@ -1,142 +1,150 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
- 
-class shop {
-	
-	public function search($value,$shop,$quality,$type,$ilevelfrom,$ilevelto,$results,$faction,$class,$subtype) 
+           ___           __ _           _ __    __     _
+          / __\ __ __ _ / _| |_ ___  __| / / /\ \ \___| |__
+         / / | '__/ _` | |_| __/ _ \/ _` \ \/  \/ / _ \ '_ \
+        / /__| | | (_| |  _| ||  __/ (_| |\  /\  /  __/ |_) |
+        \____/_|  \__,_|_|  \__\___|\__,_| \/  \/ \___|_.__/
+                          --[ Build 1.5 ]--
+                    - coded and revised by Faded -
+
+    CraftedWeb is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    included license for more details.
+
+    Support/FAQ #EmuDevs - http://emudevs.com
+*/
+
+$sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
+class shop
+{
+	public function search($value,$shop,$quality,$type,$ilevelfrom,$ilevelto,$results,$faction,$class)
 	{
+        global $sql;
 		connect::selectDB('webdb');
-		if ($shop=='vote') 
+		if ($shop == 'vote')
 			$shopGlobalVar = $GLOBALS['voteShop']; 
-		elseif($shop=='donate') 
+		elseif($shop == 'donate')
 			$shopGlobalVar = $GLOBALS['donateShop']; 
 		
-		$value = mysql_real_escape_string($value);
-		$shop = mysql_real_escape_string($shop);
+		$value = addslashes($value);
+		$shop = addslashes($shop);
 		$quality = (int)$quality;
 		$ilevelfrom = (int)$ilevelfrom;
 		$ilevelto = (int)$ilevelto;
 		$results = (int)$results;
 		$faction = (int)$faction;
 		$class = (int)$class;
-		$type = mysql_real_escape_string($type);
-		$subtype = mysql_real_escape_string($subtype);
+		$type = addslashes($type);
 		
-		if($value=="Search for an item...") 
+		if($value == "Search for an item...")
 			$value = "";
-		
 		$advanced = NULL;
-		
-		####Advanced Search
-		if($GLOBALS[$shop.'Shop']['enableAdvancedSearch']==TRUE) 
+		if($GLOBALS[$shop.'Shop']['enableAdvancedSearch'] == true)
 		{
-			if($quality!="--Quality--") 
-				$advanced.=" AND quality='".$quality."'";
+			if($quality != "--Quality--")
+				$advanced .= " AND quality='".$quality."'";
 			
-			if($type!="--Type--") {
-				if($type=="15-5" || $type=="15-5")  {
-					//Mount or pet
+			if($type != "--Type--")
+            {
+				if($type == "15-5" || $type=="15-5")
+                {
 					$type = explode('-',$type);
-					
 					$advanced.=" AND type='".$type[0]."' AND subtype='".$type[1]."'";
-				} else 
+				}
+                else
 					$advanced.=" AND type='".$type."'";
 			} 
 			
-			if($faction!="--Faction--") 
-				$advanced.=" AND faction='".$faction."'";
+			if($faction != "--Faction--")
+				$advanced .= " AND faction='".$faction."'";
 			
-			if($class!="--Class--") 
-				$advanced.=" AND class='".$class."'"; 
+			if($class != "--Class--")
+				$advanced .= " AND class='".$class."'";
 			
-			if($ilevelfrom!="--Item level from--") 
-				$advanced.=" AND itemlevel>='".$ilevelfrom."'";
+			if($ilevelfrom != "--Item level from--")
+				$advanced .= " AND itemlevel>='".$ilevelfrom."'";
 			
-			if($ilevelto!="--Item level to--") 
-				$advanced.=" AND itemlevel<='".$ilevelto."'";
+			if($ilevelto != "--Item level to--")
+				$advanced .= " AND itemlevel<='".$ilevelto."'";
 
-			$count = mysql_query("SELECT COUNT(id) FROM shopitems WHERE name LIKE '%".$value."%' 
-								  AND in_shop = '".$shop."' ".$advanced);
-		
-			if(mysql_result($count,0)==0) 
+			$count = $sql->query("SELECT COUNT(id) AS count FROM shopitems WHERE name LIKE '%".$value."%' AND in_shop = '".$shop."' ".$advanced);
+		    $result_count =  mysqli_fetch_assoc($count);
+			if($result_count['count'] == 0)
 				$count = 0;
 			 else 
-				$count = mysql_result($count,0);
+				$count = $result_count['count'];
 				
 			
-			if($results!="--Results--") 
-				$advanced.=" ORDER BY name ASC LIMIT ".$results;
+			if($results != "--Results--")
+				$advanced .= " ORDER BY name ASC LIMIT ".$results;
 			 else 
-				$advanced.=" ORDER BY name ASC LIMIT 250";
+				$advanced .= " ORDER BY name ASC LIMIT 250";
 		}
-		$result = mysql_query("SELECT entry,displayid,name,quality,price,faction,class
+		$result = $sql->query("SELECT entry,displayid,name,quality,price,faction,class
 		FROM shopitems WHERE name LIKE '%".$value."%' 
-		AND in_shop = '".mysql_real_escape_string($shop)."' ".$advanced);
+		AND in_shop = '".addslashes($shop)."' ".$advanced);
 		
-		if($results!="--Results--") 
+		if($results != "--Results--")
 			$limited = $results;
 		 else 
-			$limited = mysql_num_rows($result);
+			$limited = mysqli_num_rows($result);
 		
 	    echo "<div class='shopBox'><b>".$count."</b> results found. (".$limited." displayed)</div>";
 		
-		if (mysql_num_rows($result)==0) 
+		if (mysqli_num_rows($result) == 0)
 			echo '<b class="red_text">No results found!</b><br/>';
 		 else 
 		 {
-			while($row = mysql_fetch_assoc($result)) 
+			while($row = mysqli_fetch_assoc($result))
 			{
 				$entry = $row['entry'];
-				
-				switch($row['quality']) {
-					default:
-					        $class="white";
-					break;
-					case(0):
-					       	$class="gray";
-					break;
-					case(2):
-					        $class="green";
-					break;
-					case(3):
-					        $class="blue";
-					break;
-					case(4):
-					        $class="purple";
-					break;
-					case(5):
-					        $class="orange";
-					break;
-					
-					case(6):
-					        $class="gold";
-					break;
-					
-					case(7):
-					        $class="gold";
-					break;
+				switch($row['quality'])
+                {
+                    default:
+                        $class="white";
+                        break;
+                    case(0):
+                        $class="gray";
+                        break;
+                    case(2):
+                        $class="green";
+                        break;
+                    case(3):
+                        $class="blue";
+                        break;
+                    case(4):
+                        $class="purple";
+                        break;
+                    case(5):
+                        $class="orange";
+                        break;
+
+                    case(6):
+                        $class="gold";
+                        break;
+                    case(7):
+                        $class="gold";
+                        break;
 				}
 				
-				 $getIcon = mysql_query("SELECT icon FROM item_icons WHERE displayid='".$row['displayid']."'");
-				 if(mysql_num_rows($getIcon)==0) 
+				 $getIcon = $sql->query("SELECT icon FROM item_icons WHERE displayid='".$row['displayid']."'");
+				 if(!$getIcon)
 				 {
-					 //No icon found. Probably cataclysm item. Get the icon from wowhead instead.
+
 					 $sxml = new SimpleXmlElement(file_get_contents('http://www.wowhead.com/item='.$entry.'&xml'));
-					  
-					 $icon = strtolower(mysql_real_escape_string($sxml->item->icon));
-					 //Now that we have it loaded. Add it into database for future use.
-					 //Note that WoWHead XML is extremely slow. This is the main reason why we're adding it into the db.
-					 mysql_query("INSERT INTO item_icons VALUES('".$row['displayid']."','".$icon."')");
+					 $icon = strtolower(addslashes($sxml->item->icon));
+                     $sql->query("INSERT INTO item_icons VALUES('".$row['displayid']."','".$icon."')");
 				 }
 				 else 
 				 {
-				   $iconrow = mysql_fetch_assoc($getIcon);
+				   $iconrow = mysqli_fetch_assoc($getIcon);
 				   $icon = strtolower($iconrow['icon']);
 				 }
 				?>
@@ -214,33 +222,29 @@ class shop {
 	
 	public function listAll($shop)
 	{
+        global $sql;
 		connect::selectDB('webdb');
-		$shop = mysql_real_escape_string($shop);
-		
-		$result = mysql_query("SELECT entry,displayid,name,quality,price,faction,class
+		$shop = addslashes($shop);
+		$result = $sql->query("SELECT entry,displayid,name,quality,price,faction,class
 		FROM shopitems WHERE in_shop = '".$shop."'");
 		
-		if(mysql_num_rows($result)==0)
+		if(!$result)
 			echo 'No items was found in the shop.';
 		else
 		{
-			while($row = mysql_fetch_assoc($result))
+			while($row = mysqli_fetch_assoc($result))
 			{
 				$entry = $row['entry'];
-				$getIcon = mysql_query("SELECT icon FROM item_icons WHERE displayid='".$row['displayid']."'");
-				 if(mysql_num_rows($getIcon)==0) 
+				$getIcon = $sql->query("SELECT icon FROM item_icons WHERE displayid='".$row['displayid']."'");
+				 if(!$getIcon)
 				 {
-					 //No icon found. Probably cataclysm item. Get the icon from wowhead instead.
 					 $sxml = new SimpleXmlElement(file_get_contents('http://www.wowhead.com/item='.$entry.'&xml'));
-					  
-					 $icon = strtolower(mysql_real_escape_string($sxml->item->icon));
-					 //Now that we have it loaded. Add it into database for future use.
-					 //Note that WoWHead XML is extremely slow. This is the main reason why we're adding it into the db.
-					 mysql_query("INSERT INTO item_icons VALUES('".$row['displayid']."','".$icon."')");
+					 $icon = strtolower(addslashes($sxml->item->icon));
+                     $sql->query("INSERT INTO item_icons VALUES('".$row['displayid']."','".$icon."')");
 				 }
 				 else 
 				 {
-				   $iconrow = mysql_fetch_assoc($getIcon);
+				   $iconrow = mysqli_fetch_assoc($getIcon);
 				   $icon = strtolower($iconrow['icon']);
 				 }
 				?>
@@ -261,20 +265,20 @@ class shop {
                                     </a>
                                </td>
                                <td align="right" width="350">
-                               <?php if($row['faction']==2) 
+                               <?php if($row['faction'] == 2)
 							   {
                                  echo "<span class='blue_text'>Alliance only </span>";  
-                                 if($row['class']!="-1")
+                                 if($row['class'] != "-1")
                                 	 echo "<br/>";
                                } 
-							   elseif($row['faction']==1) 
+							   elseif($row['faction'] == 1)
 							   {
                                  echo "<span class='red_text'>Horde only </span>"; 
-                                 if($row['class']!="-1")
+                                 if($row['class'] != "-1")
                                 	 echo "<br/>";
                                }
                                
-                               if($row['class']!="-1") {
+                               if($row['class'] != "-1") {
                                  echo shop::getClassMask($row['class']);
                                }
                                
@@ -314,55 +318,53 @@ class shop {
             <?php
 			}
 		}
-		
 	}
-	
 
 	public function logItem($shop,$entry,$char_id,$account,$realm_id,$amount) 
 	{
+        global $sql;
 		connect::selectDB('webdb');
 		date_default_timezone_set($GLOBALS['timezone']);
-		mysql_query("INSERT INTO shoplog VALUES (NULL,'".(int)$entry."','".(int)$char_id."','".date("Y-m-d H:i:s")."',
-		'".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($shop)."','".(int)$account."','".(int)$realm_id."','".(int)$amount."')");
+        $sql->query("INSERT INTO shoplog VALUES (NULL,'".(int)$entry."','".(int)$char_id."','".date("Y-m-d H:i:s")."',
+		'".$_SERVER['REMOTE_ADDR']."','".addslashes($shop)."','".(int)$account."','".(int)$realm_id."','".(int)$amount."')");
 	}
 	
-	public static function getClassMask($classID) {
-		
-		switch((int)$classID) {
-
-			case(1):
-			 return "<span class='warrior_color'>Warrior only</span> <br/>";
-			break;
-			case(2):
-			 return "<span class='paladin_color'>Paladin only</span> <br/>";
-			break;
-			case(4):
-			 return "<span class='hunter_color'>Hunter only</span> <br/>";
-			break;
-			case(8):
-			 return "<span class='rogue_color'>Rogue only</span> <br/>";
-			break;
-			case(16):
-			 return "<span class='priest_color'>Priest only</span> <br/>";
-			break;
-			case(32):
-			 return "<span class='dk_color'>Death Knight only</span> <br/>";
-			break;
-			case(64):
-			 return "<span class='shaman_color'>Shaman only</span> <br/>";
-			break;
-			case(128):
-			 return "<span class='mage_color'>Mage only</span> <br/>";
-			break;
-			case(256):
-			 return "<span class='warlock_color'>Warlock only</span> <br/>";
-			break;
-			case(1024):
-			 return "<span class='druid_color'>Druid only</span> <br/>";
-			break;
-		}
-		
+	public static function getClassMask($classID)
+    {
+        global $class;
+        switch((int)$classID)
+        {
+            case(1):
+                $class = "<span class='warrior_color'>Warrior only</span> <br/>";
+                break;
+            case(2):
+                $class = "<span class='paladin_color'>Paladin only</span> <br/>";
+                break;
+            case(4):
+                $class = "<span class='hunter_color'>Hunter only</span> <br/>";
+                break;
+            case(8):
+                $class = "<span class='rogue_color'>Rogue only</span> <br/>";
+                break;
+            case(16):
+                $class = "<span class='priest_color'>Priest only</span> <br/>";
+                break;
+            case(32):
+                $class = "<span class='dk_color'>Death Knight only</span> <br/>";
+                break;
+            case(64):
+                $class = "<span class='shaman_color'>Shaman only</span> <br/>";
+                break;
+            case(128):
+                $class = "<span class='mage_color'>Mage only</span> <br/>";
+                break;
+            case(256):
+                $class = "<span class='warlock_color'>Warlock only</span> <br/>";
+                break;
+            case(1024):
+                $class = "<span class='druid_color'>Druid only</span> <br/>";
+                break;
+        }
+        return $class;
 	}
 }
-
-?>

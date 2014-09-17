@@ -1,66 +1,71 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
+           ___           __ _           _ __    __     _
+          / __\ __ __ _ / _| |_ ___  __| / / /\ \ \___| |__
+         / / | '__/ _` | |_| __/ _ \/ _` \ \/  \/ / _ \ '_ \
+        / /__| | | (_| |  _| ||  __/ (_| |\  /\  /  __/ |_) |
+        \____/_|  \__,_|_|  \__\___|\__,_| \/  \/ \___|_.__/
+                          --[ Build 1.5 ]--
+                    - coded and revised by Faded -
 
-define('INIT_SITE', TRUE);
+    CraftedWeb is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    included license for more details.
+
+    Support/FAQ #EmuDevs - http://emudevs.com
+*/
+define('INIT_SITE', true);
 include('../../includes/misc/headers.php');
 include('../../includes/configuration.php');
 include('../functions.php');
 $server = new server;
 $account = new account;
+$server->SelectDB('webdb');
 
-$server->selectDB('webdb');
-
-###############################
-if($_POST['action']=='addsingle') 
+if($_POST['action'] == 'addsingle')
 {
 	$entry = (int)$_POST['entry'];
 	$price = (int)$_POST['price'];
-	$shop = mysql_real_escape_string($_POST['shop']);
-	
+	$shop = addslashes($_POST['shop']);
 	if(empty($entry) || empty($price) || empty($shop))
 		die("Please enter all fields.");
 
-	$server->selectDB('worlddb');
-	$get = mysql_query("SELECT name,displayid,ItemLevel,quality,AllowableRace,AllowableClass,class,subclass,Flags
-	FROM item_template WHERE entry='".$entry."'")or die('Error whilst getting item data from the database. Error message: '.mysql_error());
-	$row = mysql_fetch_assoc($get);
-	
-	$server->selectDB('webdb');
-	
-	if($row['AllowableRace']=="-1")
+	$server->SelectDB('worlddb');
+	$get = $sql->query("SELECT name,displayid,ItemLevel,quality,AllowableRace,AllowableClass,class,subclass,Flags FROM item_template WHERE entry='".$entry."'");
+	$row = mysqli_fetch_assoc($get);
+	$server->SelectDB('webdb');
+	if($row['AllowableRace'] == "-1")
 		$faction = 0;
-	elseif($row['AllowableRace']==690)
+	elseif($row['AllowableRace'] == 690)
 		$faction = 1;
-	elseif($row['AllowableRace']==1101)
+	elseif($row['AllowableRace'] == 1101)
 		$faction = 2;
 	else
 		$faction = $row['AllowableRace'];
 
-	mysql_query("INSERT INTO shopitems (entry,name,in_shop,displayid,type,itemlevel,quality,price,class,faction,subtype,flags) VALUES (
-	'".$entry."','".mysql_real_escape_string($row['name'])."','".$shop."','".$row['displayid']."','".$row['class']."','".$row['ItemLevel']."'
+    $sql->query("INSERT INTO shopitems (entry,name,in_shop,displayid,type,itemlevel,quality,price,class,faction,subtype,flags) VALUES (
+	'".$entry."','".addslashes($row['name'])."','".$shop."','".$row['displayid']."','".$row['class']."','".$row['ItemLevel']."'
 	,'".$row['quality']."','".$price."','".$row['AllowableClass']."','".$faction."','".$row['subclass']."','".$row['Flags']."'
-	)")or die('Error whilst adding items to the database. Error message: '.mysql_error());
+	)");
 	
 	$server->logThis("Added ".$row['name']." to the ".$shop." shop");
-	
 	echo 'Successfully added item';
 }
-###############################
-if($_POST['action']=='addmulti') 
+
+if($_POST['action'] == 'addmulti')
 {
 	$il_from = (int)$_POST['il_from'];
 	$il_to = (int)$_POST['il_to'];
 	$price = (int)$_POST['price'];
-	$quality = mysql_real_escape_string($_POST['quality']);
-	$shop = mysql_real_escape_string($_POST['shop']);
-	$type = mysql_real_escape_string($_POST['type']);
-	
+	$quality = addslashes($_POST['quality']);
+	$shop = addslashes($_POST['shop']);
+	$type = addslashes($_POST['type']);
 	if(empty($il_from) || empty($il_to) || empty($price) || empty($shop))
 		die("Please enter all fields.");
 		
@@ -69,9 +74,7 @@ if($_POST['action']=='addmulti')
 	{
 		if($type=="15-5" || $type=="15-5")  
 		{
-			//Mount or pet
 			$type = explode('-',$type);
-			
 			$advanced.= "AND class='".$type[0]."' AND subclass='".$type[1]."'";
 		} 
 		else	
@@ -81,143 +84,120 @@ if($_POST['action']=='addmulti')
 	if($quality!="all")
 		$advanced .= " AND quality='".$quality."'";
 	        
-	$server->selectDB('worlddb');
-	$get = mysql_query("SELECT entry,name,displayid,ItemLevel,quality,class,AllowableRace,AllowableClass,subclass,Flags
-	 FROM item_template WHERE itemlevel>='".$il_from."'
-	AND itemlevel<='".$il_to."' ".$advanced) or die('Error whilst getting item data from the database. Error message: '.mysql_error());
+	$server->SelectDB('worlddb');
+	$get = $sql->query("SELECT entry,name,displayid,ItemLevel,quality,class,AllowableRace,AllowableClass,subclass,Flags
+	FROM item_template WHERE itemlevel>='".$il_from."'
+	AND itemlevel<='".$il_to."' ".$advanced);
 	
-	$server->selectDB('webdb');
+	$server->SelectDB('webdb');
 	
 	$c = 0;
-	while($row = mysql_fetch_assoc($get)) 
+	while($row = mysqli_fetch_assoc($get))
 	{
 		$faction = 0;
-		
-		if($row['AllowableRace']==690) 
+		if($row['AllowableRace'] == 690)
 			$faction = 1;
-		elseif($row['AllowableRace']==1101)
+		elseif($row['AllowableRace'] == 1101)
 			$faction = 2;
 		else
 			$faction = $row['AllowableRace'];
-	
-	mysql_query("INSERT INTO shopitems (entry,name,in_shop,displayid,type,itemlevel,quality,price,class,faction,subtype,flags) VALUES (
-	'".$row['entry']."','".mysql_real_escape_string($row['name'])."','".$shop."','".$row['displayid']."','".$row['class']."','".$row['ItemLevel']."'
-	,'".$row['quality']."','".$price."','".$row['AllowableClass']."','".$faction."','".$row['subclass']."','".$row['Flags']."'
-	)")or die('Error whilst adding items to the database. Error message: '.mysql_error());
-	
-	$c++;
+
+        $sql->query("INSERT INTO shopitems (entry,name,in_shop,displayid,type,itemlevel,quality,price,class,faction,subtype,flags) VALUES (
+        '".$row['entry']."','".addslashes($row['name'])."','".$shop."','".$row['displayid']."','".$row['class']."','".$row['ItemLevel']."'
+        ,'".$row['quality']."','".$price."','".$row['AllowableClass']."','".$faction."','".$row['subclass']."','".$row['Flags']."')");
+        $c++;
 	}
-	
 	$server->logThis("Added multiple items to the ".$shop." shop");
 	echo 'Successfully added '.$c.' items';
 }
-###############################
+
 if($_POST['action']=='clear') 
 {
 	$shop = (int)$_POST['shop'];
-	
-	if($shop==1)
+	if($shop == 1)
 		$shop = "vote";
-	elseif($shop==2)
+	elseif($shop == 2)
 		$shop = "donate";
-	
-	mysql_query("DELETE FROM shopitems WHERE in_shop='".$shop."'");
-	mysql_query("TRUNCATE shopitems");
+    $sql->query("DELETE FROM shopitems WHERE in_shop='".$shop."'");
+    $sql->query("TRUNCATE shopitems");
 	return;
 }
-###############################
-if($_POST['action']=='modsingle') 
+
+if($_POST['action'] == 'modsingle')
 {
 	$entry = (int)$_POST['entry'];
 	$price = (int)$_POST['price'];
-	$shop = mysql_real_escape_string($_POST['shop']);
-	
+	$shop = addslashes($_POST['shop']);
 	if(empty($entry) || empty($price) || empty($shop))
 		die("Please enter all fields.");
-	
-	mysql_query("UPDATE shopitems SET price='".$price."' WHERE entry='".$entry."' AND in_shop='".$shop."'");
+    $sql->query("UPDATE shopitems SET price='".$price."' WHERE entry='".$entry."' AND in_shop='".$shop."'");
 	echo 'Successfully modified item';
 }
-###############################
-if($_POST['action']=='delsingle') 
+
+if($_POST['action'] == 'delsingle')
 {
 	$entry = (int)$_POST['entry'];
-	$shop = mysql_real_escape_string($_POST['shop']);
-	
+	$shop = addslashes($_POST['shop']);
 	if(empty($entry) || empty($shop))
 		die("Please enter all fields.");
-	
-	mysql_query("DELETE FROM shopitems WHERE entry='".$entry."' AND in_shop='".$shop."'");
+    $sql->query("DELETE FROM shopitems WHERE entry='".$entry."' AND in_shop='".$shop."'");
 	echo 'Successfully removed item';
 }
-###############################
+
 if($_POST['action']=='modmulti') 
 {
 	$il_from = (int)$_POST['il_from'];
 	$il_to = (int)$_POST['il_to'];
 	$price = (int)$_POST['price'];
-	$quality = mysql_real_escape_string($_POST['quality']);
-	$shop = mysql_real_escape_string($_POST['shop']);
-	$type = mysql_real_escape_string($_POST['type']);
-	
+	$quality = addslashes($_POST['quality']);
+	$shop = addslashes($_POST['shop']);
+	$type = addslashes($_POST['type']);
 	if(empty($il_from) || empty($il_to) || empty($price) || empty($shop))
 		die("Please enter all fields.");
-		
 	$advanced = "";
-	if($type!="all") 
+	if($type != "all")
 	{
-		if($type=="15-5" || $type=="15-5")  
+		if($type == "15-5" || $type == "15-5")
 		{
-			//Mount or pet
 			$type = explode('-',$type);
-			
 			$advanced.= "AND type='".$type[0]."' AND subtype='".$type[1]."'";
 		} 
 		else	
 			$advanced.= "AND type='".$type."'";
 	} 	
 
-	if($quality!="all")
+	if($quality != "all")
 		$advanced .= "AND quality='".$quality."'";
-		
-	$count = mysql_query("COUNT(*) FROM shopitems WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);
-		
-	mysql_query("UPDATE shopitems SET price='".$price."' WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);	
-	echo 'Successfully modified '.$count.' items!';	
+	$count = $sql->query("COUNT(*) AS count FROM shopitems WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);
+    $res_count = mysqli_fetch_assoc($count);
+    $sql->query("UPDATE shopitems SET price='".$price."' WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);
+	echo 'Successfully modified '.$res_count['count'].' items!';
 }
-###############################
-if($_POST['action']=='delmulti') 
+
+if($_POST['action'] == 'delmulti')
 {
 	$il_from = (int)$_POST['il_from'];
 	$il_to = (int)$_POST['il_to'];
-	$quality = mysql_real_escape_string($_POST['quality']);
-	$shop = mysql_real_escape_string($_POST['shop']);
-	$type = mysql_real_escape_string($_POST['type']);
-	
+	$quality = addslashes($_POST['quality']);
+	$shop = addslashes($_POST['shop']);
+	$type = addslashes($_POST['type']);
 	if(empty($il_from) || empty($il_to) || empty($shop))
 		die("Please enter all fields.");
-		
 	$advanced = "";
 	if($type!="all") 
 	{
 		if($type=="15-5" || $type=="15-5")  
 		{
-			//Mount or pet
 			$type = explode('-',$type);
-			
 			$advanced.= "AND type='".$type[0]."' AND subtype='".$type[1]."'";
 		} 
 		else	
 			$advanced.= "AND type='".$type."'";
-	} 	
-
+	}
 	if($quality!="all")
 		$advanced .= "AND quality='".$quality."'";
-	
-	$count = mysql_query("COUNT(*) FROM shopitems WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);
-		
-	mysql_query("DELETE FROM shopitems WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);
-	echo 'Successfully removed '.$count.' items!';	
+	$count = $sql->query("COUNT(*) AS count FROM shopitems WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);
+    $result_count = mysqli_fetch_assoc($count);
+    $sql->query("DELETE FROM shopitems WHERE itemlevel >='".$il_from."' AND itemlevel <='".$il_to."' ".$advanced);
+	echo 'Successfully removed '.$result_count['count'].' items!';
 }
-###############################
-?>

@@ -1,27 +1,19 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
- 
 
-function qpc_post($varname){
+-------------------This script is being removed.----------------------
+
+function qpc_post($varname)
+{
 	return trim(stripslashes((get_magic_quotes_gpc()) ? $_POST[$varname] : addslashes($_POST[$varname])));
 }
 
 define('THIS_SCRIPT', 'vb_register.php');
 $root_path = '../..'.$GLOBALS['forum']['forum_path'];
-
-
 require_once($root_path.'global.php');
 require_once($root_path.'/includes/class_dm.php');
 require_once($root_path.'/includes/class_dm_user.php');
-
 $userdm = new vB_DataManager_User($vbulletin, ERRTYPE_ARRAY);
-
 $userdm->set('username', qpc_post('username'));
 $userdm->set('email', qpc_post('email'));
 $userdm->set('password', qpc_post('password'));
@@ -46,7 +38,6 @@ switch ($dst_setting)
 	break;
 }
 
-#If there are errors (eMail not set, eMail banned, Username taken, etc.) you can check for errors using
 if (count($userdm->errors)) 
 {
 	for($i=0; $ierrors; $i++) 
@@ -60,5 +51,4 @@ else
 	$newuserid = $userdm->save();
 	echo "1";
 }
-
-?>
+*/

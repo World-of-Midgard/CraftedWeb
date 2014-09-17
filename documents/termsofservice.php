@@ -1,14 +1,25 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
-?>
-<?php
-$tos_enable = false; //If set to 'true', a link to the Refund Policy will be displayed on the Registration page-
+           ___           __ _           _ __    __     _
+          / __\ __ __ _ / _| |_ ___  __| / / /\ \ \___| |__
+         / / | '__/ _` | |_| __/ _ \/ _` \ \/  \/ / _ \ '_ \
+        / /__| | | (_| |  _| ||  __/ (_| |\  /\  /  __/ |_) |
+        \____/_|  \__,_|_|  \__\___|\__,_| \/  \/ \___|_.__/
+                          --[ Build 1.5 ]--
+                    - coded and revised by Faded -
 
-$tos_message = "Write your Terms of Service here..."; //Here's your message, HTML IS allowed.
-?>
+    CraftedWeb is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    included license for more details.
+
+    Support/FAQ #EmuDevs - http://emudevs.com
+*/
+
+    $tos_enable = false; //If set to 'true', a link to the Refund Policy will be displayed on the Registration page-
+    $tos_message = "Write your Terms of Service here..."; //Here's your message, HTML IS allowed.

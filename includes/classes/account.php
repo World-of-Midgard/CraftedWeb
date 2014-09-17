@@ -1,59 +1,67 @@
 <?php
 /*
-             _____           ____
-            |   __|_____ _ _|    \ ___ _ _ ___
-            |   __|     | | |  |  | -_| | |_ -|
-            |_____|_|_|_|___|____/|___|\_/|___|
-     Copyright (C) 2013 EmuDevs <http://www.emudevs.com/>
- */
+           ___           __ _           _ __    __     _
+          / __\ __ __ _ / _| |_ ___  __| / / /\ \ \___| |__
+         / / | '__/ _` | |_| __/ _ \/ _` \ \/  \/ / _ \ '_ \
+        / /__| | | (_| |  _| ||  __/ (_| |\  /\  /  __/ |_) |
+        \____/_|  \__,_|_|  \__\___|\__,_| \/  \/ \___|_.__/
+                          --[ Build 1.5 ]--
+                    - coded and revised by Faded -
 
-##############
-##  Account functions goes here
-##############
+    CraftedWeb is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-class account {
+    This is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    included license for more details.
 
-	###############################
-	####### Log in method
-	###############################
+    Support/FAQ #EmuDevs - http://emudevs.com
+*/
+
+$sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
+class account
+{
 	public static function logIn($username,$password,$last_page,$remember)
 	{
+        global $sql;
 		if (!isset($username) || !isset($password) || $username=="Username..." || $password=="Password...")
 			echo '<span class="red_text">Please enter both fields.</span>';
 		else
 		{
-			$username = mysql_real_escape_string(trim(strtoupper($username)));
-			$password = mysql_real_escape_string(trim(strtoupper($password)));
+			$username = addslashes(trim(strtoupper($username)));
+			$password = addslashes(trim(strtoupper($password)));
 
 			connect::selectDB('logondb');
-			$checkForAccount = mysql_query("SELECT COUNT(id) FROM account WHERE username='".$username."'");
-			if (mysql_result($checkForAccount,0)==0)
+			$checkForAccount = $sql->query("SELECT COUNT(id) FROM account WHERE username='".$username."'");
+			if (!$checkForAccount)
 				echo '<span class="red_text">Invalid username.</span>';
 			else
 			{
-				if($remember!=835727313)
+				if($remember != 835727313)
 					$password = sha1("".$username.":".$password."");
 
-				$result = mysql_query("SELECT id FROM account WHERE username='".$username."' AND sha_pass_hash='".$password."'");
-				if (mysql_num_rows($result)==0)
+				$result = $sql->query("SELECT id FROM account WHERE username='".$username."' AND sha_pass_hash='".$password."'");
+				if (mysqli_num_rows($result) == 0)
 					echo '<span class="red_text">Wrong password.</span>';
 				else
 				{
 					if($remember=='on')
 						setcookie("cw_rememberMe", $username.' * '.$password, time()+30758400);
-						//Set "remember me" cookie. Expires in 1 year.
-
-					$id = mysql_fetch_assoc($result);
+					$id = mysqli_fetch_assoc($result);
 					$id = $id['id'];
 
 					self::GMLogin($username);
 					$_SESSION['cw_user'] = ucfirst(strtolower($username));
 					$_SESSION['cw_user_id'] = $id;
 
-					connect::selectDB('webdb');
-					$count = mysql_query("SELECT COUNT(*) FROM account_data WHERE id='".$id."'");
-					if(mysql_result($count,0)==0)
-						mysql_query("INSERT INTO account_data VALUES('".$id."','0','0')");
+                    connect::selectDB('webdb');
+					$count = $sql->query("SELECT COUNT(*) AS count FROM account_data WHERE id='".$id."'");
+                    $result_count = mysqli_fetch_assoc($count);
+					if($result_count['count'] == 0)
+                        $sql->query("INSERT INTO account_data VALUES('".$id."','0','0')");
 
 					if(!empty($last_page))
 					   header("Location: ".$last_page);
@@ -69,63 +77,50 @@ class account {
 
 	public static function loadUserData()
 	{
-		//Unused function
+		global $sql;
 		$user_info = array();
-
-		connect::selectDB('logondb');
-		$account_info = mysql_query("SELECT id, username, email, joindate, locked, last_ip, expansion FROM account
+        connect::selectDB('logondb');
+		$account_info = $sql->query("SELECT id, username, email, joindate, locked, last_ip, expansion FROM account
 		WHERE username='".$_SESSION['cw_user']."'");
-		while($row = mysql_fetch_array($account_info))
+		while($row = mysqli_fetch_array($account_info))
 		{
 			$user_info[] = $row;
 		}
-
 	    return $user_info;
 	}
 
-	###############################
-	####### Log out method
-	###############################
-	public static function logOut($last_page)
+	public static function logOut()
 	{
 		session_destroy();
 		setcookie('cw_rememberMe', '', time()-30758400);
 		if (empty($last_page))
 		{
-			header('Location: ?p=home"');
+			header('Location: index.php?p=home');
 			exit();
 		}
 		header('Location: '.$last_page);
 		exit();
 	}
 
-
-	###############################
-	####### Registration method
-	###############################
 	public function register($username,$email,$password,$repeat_password,$captcha,$raf)
 	{
+        global $sql;
 		$errors = array();
-
 		if (empty($username))
 			$errors[] = 'Enter a username.';
-
 		if (empty($email))
 			$errors[] = 'Enter an email address.';
-
 		if (empty($password))
 			$errors[] = 'Enter a password.';
-
 		if (empty($repeat_password))
 			$errors[] = 'Enter the password repeat.';
-
 		if($username==$password)
 			$errors[] = 'Your password cannot be your username!';
 
 		else
 		{
 			session_start();
-			if($GLOBALS['registration']['captcha']==TRUE)
+			if($GLOBALS['registration']['captcha']==true)
 			{
 				if($captcha!=$_SESSION['captcha_numero'])
 					$errors[] = 'The captcha is incorrect!';
@@ -144,111 +139,89 @@ class account {
 			}
 
 		}
-		$username_clean = mysql_real_escape_string(trim($username));
-		$password_clean = mysql_real_escape_string(trim($password));
-		$username = mysql_real_escape_string(trim(strtoupper(strip_tags($username))));
-		$email = mysql_real_escape_string(trim(strip_tags($email)));
-		$password = mysql_real_escape_string(trim(strtoupper(strip_tags($password))));
+		$username_clean = addslashes(trim($username));
+		$password_clean = addslashes(trim($password));
+		$username = addslashes(trim(strtoupper(strip_tags($username))));
+		$email = addslashes(trim(strip_tags($email)));
+		$password = addslashes(trim(strtoupper(strip_tags($password))));
 		$repeat_password = trim(strtoupper($repeat_password));
 		$raf = (int)$raf;
 
+        connect::selectDB('logondb');
 
-		connect::selectDB('logondb');
-		//Check for existing user
-		$result = mysql_query("SELECT COUNT(id) FROM account WHERE username='".$username."'");
-		if (mysql_result($result,0)>0)
+		$result = $sql->query("SELECT COUNT(id) FROM account WHERE username='".$username."'");
+		if ($result)
 			$errors[] = 'The username already exists!';
-
 		if ($password != $repeat_password)
 			$errors[] = 'The passwords does not match!';
 
 		if (!empty($errors))
 		{
-			//errors found.
 			echo "<p><h4>The following errors occured:</h4>";
-				foreach($errors as $error)
-				{
-					echo  "<strong>*", $error ,"</strong><br/>";
-				}
+            foreach($errors as $error)
+            {
+                echo  "<strong>*", $error ,"</strong><br/>";
+            }
 			echo "</p>";
 			exit();
 		}
 		else
 		{
 			$password = sha1("".$username.":".$password."");
-			mysql_query("INSERT INTO account (username,email,sha_pass_hash,joindate,expansion,recruiter)
+            $sql->query("INSERT INTO account (username,email,sha_pass_hash,joindate,expansion,recruiter)
 			VALUES('".$username."','".$email."','".$password."','".date("Y-m-d H:i:s")."','".$GLOBALS['core_expansion']."','".$raf."') ");
-
-			$getID = mysql_query("SELECT id FROM account WHERE username='".$username."'");
-			$row = mysql_fetch_assoc($getID);
-
-			connect::selectDB('webdb');
-			mysql_query("INSERT INTO account_data VALUES('".$row['id']."','','')");
-
-			$result = mysql_query("SELECT id FROM account WHERE username='".$username_clean."'");
-			$id = mysql_fetch_assoc($result);
+			$getID = $sql->query("SELECT id FROM account WHERE username='".$username."'");
+			$row = mysqli_fetch_assoc($getID);
+            connect::selectDB('webdb');
+            $sql->query("INSERT INTO account_data VALUES('".$row['id']."','','')");
+			$result = $sql->query("SELECT id FROM account WHERE username='".$username_clean."'");
+			$id = mysqli_fetch_assoc($result);
 			$id = $id['id'];
-
 			self::GMLogin($username_clean);
 			$_SESSION['cw_user']=ucfirst(strtolower($username_clean));
 			$_SESSION['cw_user_id']=$id;
-
 			account::forumRegister($username_clean,$password_clean,$email);
 		}
-
 	}
-
 
 	public static function forumRegister($username,$password,$email)
 	{
-	 date_default_timezone_set($GLOBALS['timezone']);
+        date_default_timezone_set($GLOBALS['timezone']);
+        global $phpbb_root_path, $phpEx, $user_id, $db, $config, $cache, $template;
+        if($GLOBALS['forum']['type']=='phpbb' && $GLOBALS['forum']['autoAccountCreate']==true)
+        {
+            define('IN_PHPBB', true);
+            define('ROOT_PATH', '../..'.$GLOBALS['forum']['forum_path']);
+            $phpEx = "php";
+            $phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : ROOT_PATH;
+            if(file_exists($phpbb_root_path . 'common.' . $phpEx) && file_exists($phpbb_root_path . 'includes/functions_user.' . $phpEx))
+            {
+                include($phpbb_root_path.'common.'.$phpEx);
+                include($phpbb_root_path.'includes/functions_user.'.$phpEx);
+                $arrTime = getdate();
+                $unixTime = strtotime($arrTime['year']."-".$arrTime['mon'].'-'.$arrTime['mday']." ".$arrTime['hours'].":".
+                                      $arrTime['minutes'].":".$arrTime['seconds']);
 
-     global $phpbb_root_path, $phpEx, $user, $db, $config, $cache, $template;
-	 if($GLOBALS['forum']['type']=='phpbb' && $GLOBALS['forum']['autoAccountCreate']==TRUE)
-	 {
-		     ////////PHPBB INTEGRATION//////////////
-			define('IN_PHPBB', true);
-			define('ROOT_PATH', '../..'.$GLOBALS['forum']['forum_path']);
+                $user_row = array(
+                    'username'              => $username,
+                    'user_password'         => phpbb_hash($password),
+                    'user_email'            => $email,
+                    'group_id'              => (int) 2,
+                    'user_timezone'         => (float) 0,
+                    'user_dst'              => "0",
+                    'user_lang'             => "en",
+                    'user_type'             => 0,
+                    'user_actkey'           => "",
+                    'user_ip'               => $_SERVER['REMOTE_HOST'],
+                    'user_regdate'          => $unixTime,
+                    'user_inactive_reason'  => 0,
+                    'user_inactive_time'    => 0
+                );
+                $user_id = user_add($user_row);
+            }
+        }
+    }
 
-			$phpEx = "php";
-			$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : ROOT_PATH;
-
-			if(file_exists($phpbb_root_path . 'common.' . $phpEx) && file_exists($phpbb_root_path . 'includes/functions_user.' . $phpEx))
-			{
-			include($phpbb_root_path.'common.'.$phpEx);
-
-			include($phpbb_root_path.'includes/functions_user.'.$phpEx);
-
-			$arrTime = getdate();
-			$unixTime = strtotime($arrTime['year']."-".$arrTime['mon'].'-'.$arrTime['mday']." ".$arrTime['hours'].":".
-								  $arrTime['minutes'].":".$arrTime['seconds']);
-
-			$user_row = array(
-				'username'              => $username,
-				'user_password'         => phpbb_hash($password),
-				'user_email'            => $email,
-				'group_id'              => (int) 2,
-				'user_timezone'         => (float) 0,
-				'user_dst'              => "0",
-				'user_lang'             => "en",
-				'user_type'             => 0,
-				'user_actkey'           => "",
-				'user_ip'               => $_SERVER['REMOTE_HOST'],
-				'user_regdate'          => $unixTime,
-				'user_inactive_reason'  => 0,
-				'user_inactive_time'    => 0
-			);
-
-			// All the information has been compiled, add the user
-			// tables affected: users table, profile_fields_data table, groups table, and config table.
-			$user_id = user_add($user_row);
-			}
-	  	}
-	}
-
-	###############################
-	####### Check if a user is logged in method.
-	###############################
 	public static function isLoggedIn()
 	{
 		if (isset($_SESSION['cw_user']))
@@ -258,10 +231,6 @@ class account {
         }
 	}
 
-
-	###############################
-	####### Check if a user is NOT logged in method.
-	###############################
 	public static function isNotLoggedIn()
 	{
 		if (!isset($_SESSION['cw_user']))
@@ -280,19 +249,15 @@ class account {
         }
 	}
 
-
-	###############################
-	####### Return ban status method.
-	###############################
 	public static function checkBanStatus($user)
 	{
-		connect::selectDB('logondb');
+        global $sql;
+        connect::selectDB('logondb');
 		$acct_id = self::getAccountID($user);
-
-		$result = mysql_query("SELECT bandate,unbandate,banreason FROM account_banned WHERE id='".$acct_id."' AND active=1");
-		if (mysql_num_rows($result)>0)
+		$result = $sql->query("SELECT bandate,unbandate,banreason FROM account_banned WHERE id='".$acct_id."' AND active=1");
+		if (mysqli_num_rows($result) > 0)
 		{
-			$row = mysql_fetch_assoc($result);
+			$row = mysqli_fetch_assoc($result);
             if($row['bandate'] >= $row['unbandate'] && $row['unbandate'] < time())
             {
                 return '<span class="red_text">Banned<br />
@@ -315,32 +280,26 @@ class account {
         return '<b class="green_text">Active</b>';
 	}
 
-
-	###############################
-	####### Return account ID method.
-	###############################
 	public static function getAccountID($user)
 	{
-		$user = mysql_real_escape_string($user);
-		connect::selectDB('logondb');
-		$result = mysql_query("SELECT id FROM account WHERE username='".$user."'");
-		$row = mysql_fetch_assoc($result);
+        global $sql;
+		$user = addslashes($user);
+        connect::selectDB('logondb');
+		$result = $sql->query("SELECT id FROM account WHERE username='".$user."'");
+		$row = mysqli_fetch_assoc($result);
 		return $row['id'];
 	}
 
 	public static function getAccountName($id)
 	{
+        global $sql;
 		$id = (int)$id;
-		connect::selectDB('logondb');
-		$result = mysql_query("SELECT username FROM account WHERE id='".$id."'");
-		$row = mysql_fetch_assoc($result);
+        connect::selectDB('logondb');
+		$result = $sql->query("SELECT username FROM account WHERE id='".$id."'");
+		$row = mysqli_fetch_assoc($result);
 		return $row['username'];
 	}
 
-
-	###############################
-	####### "Remember me" method. Loads on page startup.
-	###############################
 	public function getRemember()
 	{
 		if (isset($_COOKIE['cw_rememberMe']) && !isset($_SESSION['cw_user'])) {
@@ -349,94 +308,77 @@ class account {
 		}
 	}
 
-
-	###############################
-	####### Return account Vote Points method.
-	###############################
 	public static function loadVP($account_name)
 	{
+        global $sql;
 		$acct_id = self::getAccountID($account_name);
-		connect::selectDB('webdb');
-		$result = mysql_query("SELECT vp FROM account_data WHERE id=".$acct_id);
-		if (mysql_num_rows($result)==0)
+        connect::selectDB('webdb');
+		$result = $sql->query("SELECT vp FROM account_data WHERE id=".$acct_id);
+		if (mysqli_num_rows($result) == 0)
 			return 0;
 		else
 		{
-			$row = mysql_fetch_assoc($result);
+			$row = mysqli_fetch_assoc($result);
 			return $row['vp'];
 		}
 	}
 
-
 	public static function loadDP($account_name)
 	{
+        global $sql;
 	    $acct_id = self::getAccountID($account_name);
-		connect::selectDB('webdb');
-		$result = mysql_query("SELECT dp FROM account_data WHERE id=".$acct_id);
-		if (mysql_num_rows($result)==0)
+        connect::selectDB('webdb');
+		$result = $sql->query("SELECT dp FROM account_data WHERE id=".$acct_id);
+		if (mysqli_num_rows($result) == 0)
 			return 0;
 		else
 		{
-			$row = mysql_fetch_assoc($result);
+			$row = mysqli_fetch_assoc($result);
 			return $row['dp'];
 		}
 	}
 
-
-
-	###############################
-	####### Return email method.
-	###############################
 	public static function getEmail($account_name)
 	{
-		$account_name = mysql_real_escape_string($account_name);
-		connect::selectDB('logondb');
-		$result = mysql_query("SELECT email FROM account WHERE username='".$account_name."'");
-		$row = mysql_fetch_assoc($result);
+        global $sql;
+		$account_name = addslashes($account_name);
+        connect::selectDB('logondb');
+		$result = $sql->query("SELECT email FROM account WHERE username='".$account_name."'");
+		$row = mysqli_fetch_assoc($result);
 		return $row['email'];
 	}
 
-
-	###############################
-	####### Return online status method.
-	###############################
 	public static function getOnlineStatus($account_name)
 	{
-		$account_name = mysql_real_escape_string($account_name);
-		connect::selectDB('logondb');
-		$result = mysql_query("SELECT COUNT(online) FROM account WHERE username='".$account_name."' AND online=1");
-		if (mysql_result($result,0)==0)
+        global $sql;
+		$account_name = addslashes($account_name);
+        connect::selectDB('logondb');
+		$result = $sql->query("SELECT COUNT(online) FROM account WHERE username='".$account_name."' AND online=1");
+		if (!$result)
 			return '<b class="red_text">Offline</b>';
 		else
 			return '<b class="green_text">Online</b>';
 	}
 
-
-	###############################
-	####### Return Join date method.
-	###############################
 	public static function getJoindate($account_name)
 	{
-		$account_name = mysql_real_escape_string($account_name);
-		connect::selectDB('logondb');
-		$result = mysql_query("SELECT joindate FROM account WHERE username='".$account_name."'");
-		$row = mysql_fetch_assoc($result);
+        global $sql;
+		$account_name = addslashes($account_name);
+        connect::selectDB('logondb');
+		$result = $sql->query("SELECT joindate FROM account WHERE username='".$account_name."'");
+		$row = mysqli_fetch_assoc($result);
 		return $row['joindate'];
 	}
 
-
-	###############################
-	####### Returns a GM session if the user is a GM with rank 2 and above.
-	###############################
 	public static function GMLogin($account_name)
 	{
-		connect::selectDB('logondb');
+        global $sql;
+        connect::selectDB('logondb');
 		$acct_id = self::getAccountID($account_name);
-
-		$result = mysql_query("SELECT gmlevel FROM account_access WHERE gmlevel > 2 AND id=".$acct_id);
-		if(mysql_num_rows($result)>0)
+		$result = $sql->query("SELECT gmlevel FROM account_access WHERE gmlevel > 2 AND id=".$acct_id);
+		if(mysqli_num_rows($result) > 0)
 		{
-			$row = mysql_fetch_assoc($result);
+			$row = mysqli_fetch_assoc($result);
 			$_SESSION['cw_gmlevel']=$row['gmlevel'];
 		}
 
@@ -444,30 +386,29 @@ class account {
 
 	public static function getCharactersForShop($account_name)
 	{
+        global $sql;
 		$acct_id = self::getAccountID($account_name);
-		connect::selectDB('webdb');
-		$getRealms = mysql_query("SELECT id,name FROM realms");
-		while($row = mysql_fetch_assoc($getRealms))
+        connect::selectDB('webdb');
+		$getRealms = $sql->query("SELECT id,name FROM realms");
+		while($row = mysqli_fetch_assoc($getRealms))
 		{
 			connect::connectToRealmDB($row['id']);
-			$result = mysql_query("SELECT name,guid FROM characters WHERE account='".$acct_id."'");
-			if(mysql_num_rows($result)==0 && !isset($x))
+			$result = $sql->query("SELECT name,guid FROM characters WHERE account='".$acct_id."'");
+			if(mysqli_num_rows($result) == 0 && !isset($x))
 			{
 				$x = true;
 			     echo '<option value="">No characters found!</option>';
 			}
-
-			while($char = mysql_fetch_assoc($result))
+			while($char = mysqli_fetch_assoc($result))
 			{
 				echo '<option value="'.$char['guid'].'*'.$row['id'].'">'.$char['name'].' - '.$row['name'].'</option>';
 			}
 		}
 	}
 
-
 	public static function changeEmail($email,$current_pass)
 	{
-
+        global $sql;
 		$errors = array();
 		if (empty($current_pass))
 			$errors[] = 'Please enter your current password';
@@ -476,18 +417,14 @@ class account {
 			if (empty($email))
 				$errors[] = 'Please enter an email address.';
 
-			connect::selectDB('logondb');
+            connect::selectDB('logondb');
 			$id = $_SESSION['cw_user_id'];
-			$username = mysql_real_escape_string(trim(strtoupper($_SESSION['cw_user'])));
-			$password = mysql_real_escape_string(trim(strtoupper($current_pass)));
-
+			$username = addslashes(trim(strtoupper($_SESSION['cw_user'])));
+			$password = addslashes(trim(strtoupper($current_pass)));
 			$password = sha1("".$username.":".$password."");
-
-			$result = mysql_query("SELECT COUNT(id) FROM account WHERE id='".$id."' AND sha_pass_hash='".$password."'");
-			if (mysql_result($result,0)==0)
+			$result = $sql->query("SELECT COUNT(id) FROM account WHERE id='".$id."' AND sha_pass_hash='".$password."'");
+			if (!$result)
 				$errors[] = 'The current password is incorrect.';
-
-
 			if ($GLOBALS['registration']['validateEmail']==true)
 			{
 			    if (filter_var($email, FILTER_VALIDATE_EMAIL) === false)
@@ -498,7 +435,7 @@ class account {
         echo '<div class="news" style="padding: 5px;">';
 		if(empty($errors))
         {
-            mysql_query("UPDATE account SET email='".$email."' WHERE id='".$_SESSION['cw_user_id']."'");
+            $sql->query("UPDATE account SET email='".$email."' WHERE id='".$_SESSION['cw_user_id']."'");
 			echo '<h4 class="green_text">Successfully updated your account</h4>';
         }
 		else
@@ -513,21 +450,17 @@ class account {
         echo '</div>';
 	}
 
-
-
-	//Used for the change password page.
 	public static function changePass($old,$new,$new_repeat)
 	{
-		//Check if all field values has been typed into
+		global $sql;
 		if (!isset($_POST['cur_pass']) || !isset($_POST['new_pass']) || !isset($_POST['new_pass_repeat']))
 			echo '<b class="red_text">Please type in all fields!</b>';
 	    else
 		{
-            $_POST['cur_pass']=mysql_real_escape_string(trim($old));
-            $_POST['new_pass']=mysql_real_escape_string(trim($new));
-            $_POST['new_pass_repeat']=mysql_real_escape_string(trim($new_repeat));
+            $_POST['cur_pass'] = addslashes(trim($old));
+            $_POST['new_pass'] = addslashes(trim($new));
+            $_POST['new_pass_repeat'] = addslashes(trim($new_repeat));
 
-			//Check if new passwords match?
 			if ($_POST['new_pass'] != $_POST['new_pass_repeat'])
 				echo '<b class="red_text">The new passwords doesnt match!</b>';
 			else
@@ -537,101 +470,91 @@ class account {
 				  echo '<b class="red_text">Your password must be between 6 and 32 letters</b>';
 			  else
 			  {
-				//Lets check if the old password is correct!
-				$username = strtoupper(mysql_real_escape_string($_SESSION['cw_user']));
-				connect::selectDB('logondb');
-				$getPass = mysql_query("SELECT `sha_pass_hash` FROM `account` WHERE `id`='".$_SESSION['cw_user_id']."'");
-				$row = mysql_fetch_assoc($getPass);
-				$thePass = $row['sha_pass_hash'];
-
-				$pass = mysql_real_escape_string(strtoupper($_POST['cur_pass']));
-				$pass_hash = sha1($username.':'.$pass);
-
-				$new_pass = mysql_real_escape_string(strtoupper($_POST['new_pass']));
-				$new_pass_hash = sha1($username.':'.$new_pass);
-
-				if ($thePass != $pass_hash)
-					echo '<b class="red_text">The old password is not correct!</b>';
-				else
-				{
-					//success, change password
-					echo 'Your Password was changed!';
-                    if (isset($_COOKIE['cw_rememberMe']))
-                        setcookie("cw_rememberMe", $username.' * '.$new_pass, time()+30758400);
-					mysql_query("UPDATE account SET sha_pass_hash='".$new_pass_hash."', v='0', s='0' WHERE id='".$_SESSION['cw_user_id']."'");
-				}
-			}
-		  }
+                    $username = strtoupper(addslashes($_SESSION['cw_user']));
+                    connect::selectDB('logondb');
+                    $getPass = $sql->query("SELECT `sha_pass_hash` FROM `account` WHERE `id`='".$_SESSION['cw_user_id']."'");
+                    $row = mysqli_fetch_assoc($getPass);
+                    $thePass = $row['sha_pass_hash'];
+                    $pass = addslashes(strtoupper($_POST['cur_pass']));
+                    $pass_hash = sha1($username.':'.$pass);
+                    $new_pass = addslashes(strtoupper($_POST['new_pass']));
+                    $new_pass_hash = sha1($username.':'.$new_pass);
+                    if ($thePass != $pass_hash)
+                        echo '<b class="red_text">The old password is not correct!</b>';
+                    else
+                    {
+                        echo 'Your Password was changed!';
+                        if (isset($_COOKIE['cw_rememberMe']))
+                            setcookie("cw_rememberMe", $username.' * '.$new_pass, time()+30758400);
+                        $sql->query("UPDATE account SET sha_pass_hash='".$new_pass_hash."', v='0', s='0' WHERE id='".$_SESSION['cw_user_id']."'");
+                    }
+			    }
+		    }
 		}
 	}
 
 	public static function changePassword($account_name,$password)
 	{
-			$username = mysql_real_escape_string(strtoupper($account_name));
-			$pass = mysql_real_escape_string(strtoupper($password));
-			$pass_hash = sha1($username.':'.$pass);
-
-			connect::selectDB('logondb');
-			mysql_query("UPDATE `account` SET `sha_pass_hash`='{$pass_hash}', v='0', s='0' WHERE `id`='".$_SESSION['cw_user_id']."'");
-
-			account::logThis("Changed password","passwordchange",NULL);
+        global $sql;
+        $username = addslashes(strtoupper($account_name));
+        $pass = addslashes(strtoupper($password));
+        $pass_hash = sha1($username.':'.$pass);
+        connect::selectDB('logondb');
+        $sql->query("UPDATE `account` SET `sha_pass_hash`='{$pass_hash}', v='0', s='0' WHERE `id`='".$_SESSION['cw_user_id']."'");
+        account::logThis("Changed password","passwordchange",NULL);
 	}
 
 	public static function changeForgottenPassword($account_name,$password)
 	{
-			connect::selectDB('logondb');
-			$username = mysql_real_escape_string(strtoupper($account_name));
-			$result = mysql_query("SELECT * FROM account WHERE username='".$username."'");
-			$row = mysql_fetch_array($result);
-
-			if($row)
-			{
-				$password = strtoupper($password);
-				$password_hash = mysql_real_escape_string(sha1($username.':'.$password));
-
-				connect::selectDB('logondb');
-				mysql_query("UPDATE `account` SET `sha_pass_hash`='".$password_hash."', `v`='0', `s`='0' WHERE `id`='".$row['id']."'");
-				account::logThis($account_name." Successfully recovered password","passwordrecoverd",NULL);
-			}
-	 }
+        global $sql;
+        connect::selectDB('logondb');
+        $username = addslashes(strtoupper($account_name));
+        $result = $sql->query("SELECT * FROM account WHERE username='".$username."'");
+        $row = mysqli_fetch_array($result);
+        if($row)
+        {
+            $password = strtoupper($password);
+            $password_hash = addslashes(sha1($username.':'.$password));
+            connect::selectDB('logondb');
+            $sql->query("UPDATE `account` SET `sha_pass_hash`='".$password_hash."', `v`='0', `s`='0' WHERE `id`='".$row['id']."'");
+            account::logThis($account_name." Successfully recovered password","passwordrecoverd",NULL);
+        }
+    }
 
 	public static function forgotPW($account_name, $account_email)
 	{
-		$account_name = mysql_real_escape_string($account_name);
-		$account_email = mysql_real_escape_string($account_email);
-
+        global $sql;
+		$account_name = addslashes($account_name);
+		$account_email = addslashes($account_email);
 		if (empty($account_name) || empty($account_email))
 			echo '<b class="red_text">Please enter both fields.</b>';
 		else
 		{
-			connect::selectDB('logondb');
-			$result = mysql_query("SELECT COUNT('id') FROM account
-								   WHERE username='".$account_name."' AND email='".$account_email."'");
-
-			if (mysql_result($result,0)==0)
+            connect::selectDB('logondb');
+			$result = $sql->query("SELECT COUNT('id') FROM account WHERE username='".$account_name."' AND email='".$account_email."'");
+			if (!$result)
 				echo '<b class="red_text">The username or email is incorrect.</b>';
 			else
 			{
-				//Success, lets send an email & add the forgotpw thingy.
 				$code = RandomString();
 				$emailSent = website::sendEmail($account_email,$GLOBALS['default_email'],'Forgot Password',"
-				Hello there. <br/><br/>
+				Hello, <br/><br/>
 				A password reset has been requested for the account ".$account_name." <br/>
-				If you wish to reset your password, click the following link: <br/>
+				If you requested to reset your password, click the following link: <br/>
 				<a href='".$GLOBALS['website_domain']."?p=forgotpw&code=".$code."&account=".account::getAccountID($account_name)."'>
 				".$GLOBALS['website_domain']."?p=forgotpw&code=".$code."&account=".account::getAccountID($account_name)."</a>
 
 				<br/><br/>
 
-				If you did not request this, just ignore this message.<br/><br/>
-				Sincerely, The Management.");
+				If you did not request a password reset, then just ignore this message.<br/><br/>
+				Sincerely,
+				Management.");
                 if ($emailSent)
                 {
 				    $account_id = self::getAccountID($account_name);
-				    connect::selectDB('webdb');
-
-				    mysql_query("DELETE FROM password_reset WHERE account_id='".$account_id."'");
-				    mysql_query("INSERT INTO password_reset (code,account_id)
+                    connect::selectDB('webdb');
+                    $sql->query("DELETE FROM password_reset WHERE account_id='".$account_id."'");
+                    $sql->query("INSERT INTO password_reset (code,account_id)
 				    VALUES ('".$code."','".$account_id."')");
 				    echo "An email containing a link to reset your password has been sent to the Email address you specified.
 					      If you've tried to send other forgot password requests before this, they won't work. <br/>";
@@ -644,100 +567,99 @@ class account {
 		}
 	}
 
-		public static function hasVP($account_name,$points)
-		{
-			$points = (int)$points;
-			$account_id = self::getAccountID($account_name);
-			connect::selectDB('webdb');
-			$result = mysql_query("SELECT COUNT('id') FROM account_data WHERE vp >= '".$points."' AND id='".$account_id."'");
+    public static function hasVP($account_name,$points)
+    {
+        global $sql;
+        $points = (int)$points;
+        $account_id = self::getAccountID($account_name);
+        connect::selectDB('webdb');
+        $result = $sql->query("SELECT COUNT('id') FROM account_data WHERE vp >= '".$points."' AND id='".$account_id."'");
+        if (!$result)
+            return false;
+        else
+            return true;
+    }
 
-			if (mysql_result($result,0)==0)
-				return FALSE;
-			else
-				return TRUE;
-		}
+    public static function hasDP($account_name,$points)
+    {
+        global $sql;
+        $points = (int)$points;
+        $account_id = self::getAccountID($account_name);
+        connect::selectDB('webdb');
+        $result = $sql->query("SELECT COUNT('id') FROM account_data WHERE dp >= '".$points."' AND id='".$account_id."'");
+        if (!$result)
+            return false;
+        else
+            return true;
+    }
 
-		public static function hasDP($account_name,$points)
-		{
-			$points = (int)$points;
-			$account_id = self::getAccountID($account_name);
-			connect::selectDB('webdb');
-			$result = mysql_query("SELECT COUNT('id') FROM account_data WHERE dp >= '".$points."' AND id='".$account_id."'");
+    public static function deductVP($account_id,$points)
+    {
+        global $sql;
+        $points = (int)$points;
+        $account_id = (int)$account_id;
+        connect::selectDB('webdb');
+        $sql->query("UPDATE account_data SET vp=vp - ".$points." WHERE id='".$account_id."'");
+    }
 
-			if (mysql_result($result,0)==0)
-				return FALSE;
-			else
-				return TRUE;
-		}
+    public static function deductDP($account_id,$points)
+    {
+        global $sql;
+        $points = (int)$points;
+        $account_id = (int)$account_id;
+        connect::selectDB('webdb');
+        $sql->query("UPDATE account_data SET dp=dp - ".$points." WHERE id='".$account_id."'");
+    }
 
+    public static function addDP($account_id,$points)
+    {
+        global $sql;
+        $account_id = (int)$account_id;
+        $points = (int)$points;
+        connect::selectDB('webdb');
+        $sql->query("UPDATE account_data SET dp=dp + ".$points." WHERE id='".$account_id."'");
+    }
 
-		public static function deductVP($account_id,$points)
-		{
-			$points = (int)$points;
-			$account_id = (int)$account_id;
-			connect::selectDB('webdb');
+    public static function addVP($account_id,$points)
+    {
+        global $sql;
+        $account_id = (int)$account_id;
+        $points = (int)$points;
+        connect::selectDB('webdb');
+        $sql->query("UPDATE account_data SET dp=dp + ".$points." WHERE id='".$account_id."'");
+    }
 
-			mysql_query("UPDATE account_data SET vp=vp - ".$points." WHERE id='".$account_id."'");
-		}
+    public static function getAccountIDFromCharId($char_id,$realm_id)
+    {
+        global $sql;
+        $char_id = (int)$char_id;
+        $realm_id = (int)$realm_id;
+        connect::selectDB('webdb');
+        connect::connectToRealmDB($realm_id);
+        $result = $sql->query("SELECT account FROM characters WHERE guid='".$char_id."'");
+        $row = mysqli_fetch_assoc($result);
+        return $row['account'];
+    }
 
-		public static function deductDP($account_id,$points)
-		{
-			$points = (int)$points;
-			$account_id = (int)$account_id;
-			connect::selectDB('webdb');
+    public static function isGM($account_name)
+    {
+        global $sql;
+         $account_id = self::getAccountID($account_name);
+         $result = $sql->query("SELECT COUNT(id) FROM account_access WHERE id='".$account_id."' AND gmlevel >= 1");
+         if ($result)
+             return true;
+         else
+             return false;
+    }
 
-			mysql_query("UPDATE account_data SET dp=dp - ".$points." WHERE id='".$account_id."'");
-		}
-
-		public static function addDP($account_id,$points)
-		{
-			$account_id = (int)$account_id;
-			$points = (int)$points;
-			connect::selectDB('webdb');
-
-			mysql_query("UPDATE account_data SET dp=dp + ".$points." WHERE id='".$account_id."'");
-		}
-
-		public static function addVP($account_id,$points)
-		{
-			$account_id = (int)$account_id;
-			$points = (int)$points;
-			connect::selectDB('webdb');
-
-			mysql_query("UPDATE account_data SET dp=dp + ".$points." WHERE id='".$account_id."'");
-		}
-
-		public static function getAccountIDFromCharId($char_id,$realm_id)
-		{
-			$char_id = (int)$char_id;
-			$realm_id = (int)$realm_id;
-			connect::selectDB('webdb');
-			connect::connectToRealmDB($realm_id);
-
-			$result = mysql_query("SELECT account FROM characters WHERE guid='".$char_id."'");
-			$row = mysql_fetch_assoc($result);
-			return $row['account'];
-		}
-
-
-		public static function isGM($account_name)
-		{
-	         $account_id = self::getAccountID($account_name);
-			 $result = mysql_query("SELECT COUNT(id) FROM account_access WHERE id='".$account_id."' AND gmlevel >= 1");
-			 if (mysql_result($result,0)>0)
-				 return TRUE;
-			 else
-				 return FALSE;
-		}
-
-		public static function logThis($desc,$service,$realmid)
-		{
-			$desc = mysql_real_escape_string($desc);
-			$realmid = (int)$realmid;
-			$service = mysql_real_escape_string($service);
-			$account = (int)$_SESSION['cw_user_id'];
-
-			connect::selectDB('webdb');
-			mysql_query("INSERT INTO user_log VALUES(NULL,'".$account."','".$service."','".time()."','".$_SERVER['REMOTE_ADDR']."','".$realmid."','".$desc."')");
-	}
+    public static function logThis($desc,$service,$realmid)
+    {
+        global $sql;
+        $desc = addslashes($desc);
+        $realmid = (int)$realmid;
+        $service = addslashes($service);
+        $account = (int)$_SESSION['cw_user_id'];
+        connect::selectDB('webdb');
+        $sql->query("INSERT INTO user_log VALUES(NULL,'".$account."','".$service."','".time()."','".$_SERVER['REMOTE_ADDR']."','".$realmid."','".$desc."')");
+    }
 }
