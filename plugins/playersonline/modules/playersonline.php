@@ -21,7 +21,7 @@
     Support/FAQ #EmuDevs - http://emudevs.com
 */
 
-    $sql = $server->sqli();
+    $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
     connect::selectDB('webdb');
     if (!isset($GLOBALS['playersOnline']))
         return;

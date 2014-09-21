@@ -28,7 +28,7 @@ include('../functions.php');
 $server = new server;
 $account = new account;
 $server->SelectDB('webdb');
-
+$sql = $server->sqli();
 if($_POST['function'] == 'post')
 {
 	if(empty($_POST['title']) || empty($_POST['author']) || empty($_POST['content']))
@@ -38,10 +38,9 @@ if($_POST['function'] == 'post')
 	('".addslashes($_POST['title'])."','".addslashes(trim(htmlentities($_POST['content'])))."',
 	'".addslashes($_POST['author'])."','".addslashes($_POST['image'])."',
 	'".date("Y-m-d H:i:s")."')");
-	
-	$server->logThis("Posted a news post");
-	echo "Successfully posted news.";
-    echo '<META http-equiv="refresh" content="0;URL=?p=news&s=manage">';
+
+    echo '<META http-equiv="refresh" content="1;URL=?p=news&s=manage">';
+    $server->logThis("Posted a news post");
 }
 
 elseif($_POST['function'] == 'delete')
@@ -59,7 +58,7 @@ elseif($_POST['function'] == 'edit')
 	$id = (int)$_POST['id'];
 	$title = ucfirst(addslashes($_POST['title']));
 	$author = ucfirst(addslashes($_POST['author']));
-	$content = addslashes(trim(htmlentities($_POST['content'])));
+	$content = addslashes(($_POST['content']));
 	
 	if(empty($id) || empty($title) || empty($content))
 	 	die("Please enter both fields.");

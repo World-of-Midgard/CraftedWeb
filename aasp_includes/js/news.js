@@ -2,14 +2,12 @@ function postNews() {
 	var title = document.getElementById("news_title").value;
 	var author = document.getElementById("news_author").value;
 	var content = document.getElementById("wysiwyg").value;
-	
 	var image = document.getElementById("news_image").value;
 	content = content.replace(/&nbsp;/, '').replace(/<br>/, '\n');
 	showLoader();
 	$.post("../aasp_includes/scripts/news.php", { function: "post", title: title, author: author, content: content,image: image },
        function(data) {
-           $("#loading").html(data + "<br/><br/><a href='#' style='color: black' onclick='hideLoader()'>Close</a>");
-		 
+           $("#loading").html(data + "<br/><br/><a href='#' style='color: black' onclick='location.href=?p=news&s=manage'>Close</a>");
    });
 }
 function deleteNews(id) {
