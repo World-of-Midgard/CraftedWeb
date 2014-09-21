@@ -37,7 +37,7 @@
     // Site settings
     $website_title = 'CraftedWeb';
     $default_email = 'noreply@emudevs.com';
-    $website_domain = 'http://emudevs.com/_cw'; // Path of your website, ie: http://craftedweb.com/
+    $website_domain = 'http://emudevs.com/'; // Path of your website, ie: http://craftedweb.com/
 
     // Show page loading time
     $showLoadTime = false;
