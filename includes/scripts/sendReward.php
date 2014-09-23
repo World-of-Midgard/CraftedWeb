@@ -21,8 +21,8 @@
     Support/FAQ #EmuDevs - http://emudevs.com
 */
 
-    $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
     require('../ext_scripts_class_loader.php');
+    $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
     if (isset($_POST['item_entry']))
     {
         $entry = addslashes($_POST['item_entry']);

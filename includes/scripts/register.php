@@ -21,19 +21,19 @@
     Support/FAQ #EmuDevs - http://emudevs.com
 */
 
-    $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
     require('../ext_scripts_class_loader.php');
+    $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
     connect::selectDB('logondb');
     if (isset($_POST['register']))
     {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
-    $repeat_password = trim($_POST['password_repeat']);
-    $captcha = (int)$_POST['captcha'];
-    $raf = $_POST['raf'];
-    $account->register($username,$email,$password,$repeat_password,$captcha,$raf);
-    echo true;
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $password = trim($_POST['password']);
+        $repeat_password = trim($_POST['password_repeat']);
+        $captcha = (int)$_POST['captcha'];
+        $raf = $_POST['raf'];
+        $account->register($username,$email,$password,$repeat_password,$captcha,$raf);
+        echo true;
     }
 
     if(isset($_POST['check']))

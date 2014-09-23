@@ -21,8 +21,8 @@
     Support/FAQ #EmuDevs - http://emudevs.com
 */
 
-    //$sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
     require('../ext_scripts_class_loader.php');
+    $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
     if(isset($_POST['element']) &&$_POST['element'] == 'vote')
         echo 'Vote Points: '.account::loadVP($_POST['account']);
     elseif(isset($_POST['element']) && $_POST['element']=='donate')

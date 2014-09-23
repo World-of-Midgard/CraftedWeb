@@ -21,8 +21,8 @@
     Support/FAQ #EmuDevs - http://emudevs.com
 */
 
-$sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
 require('../ext_scripts_class_loader.php');
+$sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
 if (!isset($_SESSION['cw_user']))
     die('Invalid access!');
 $acct_id = account::getAccountID($_SESSION['cw_user']);
