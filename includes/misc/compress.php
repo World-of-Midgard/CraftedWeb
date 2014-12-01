@@ -33,7 +33,7 @@ if ($GLOBALS['compression']['sanitize_output'] == true)
 	{
 		$search = array('/\>[^\S ]+/s', '/[^\S ]+\</s', '/(\s)+/s');
 		$replace = array('>', '<', '\\1');
-		$buffer = preg_replace($search, $replace, $buffer);
+		$buffer = preg_replace_callback($search, $replace, $buffer);
 		return $buffer;
 	}
 	ob_start("sanitize_output");

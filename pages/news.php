@@ -30,10 +30,10 @@
         $row = mysqli_fetch_assoc($result); ?>
         <div class='box_two_title'><?php echo $row['title']; ?></div>
 
-        <?php/*
+        <?php
         $text = preg_replace("#((http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s)#ie",
         "'<a href=\"$1\" target=\"_blank\">http://$3</a>$4'",$row['body']);
-        echo nl2br($text);*/
+        echo nl2br($text);
         ?>
 
         <br/><br/>
@@ -140,7 +140,8 @@
     }
     else
     {
-        $result = $sql->query("SELECT * FROM news ORDER BY id DESC");
+        $sql->select_db($GLOBALS['connection']['webdb']);
+        $result = $sql->query("SELECT * FROM news ORDER BY id DESC") or die(mysqli_error($sql));
         while($row = mysqli_fetch_assoc($result))
         {
             if(file_exists($row['image']))

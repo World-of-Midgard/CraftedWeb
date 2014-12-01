@@ -70,9 +70,9 @@ class website
                         }
                         $output .= $newsPT1;
                         unset($newsPT1);
-                        $text = html_entity_decode(preg_replace("
-                        #((http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s)#ie",
-                        "'<a href=\"$1\" target=\"_blank\">http://$3</a>$4'",
+                        $text = html_entity_decode(preg_replace_callback("
+                        @((http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s)@",
+                        function($m) { return "<a href=\"".$m[1]."\">http://".$m[3]."</a>".$m[4];},
                         $row['body']
                         ));
 

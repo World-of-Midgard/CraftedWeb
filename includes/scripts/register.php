@@ -23,7 +23,7 @@
 
     require('../ext_scripts_class_loader.php');
     $sql = new mysqli($GLOBALS['connection']['host'],$GLOBALS['connection']['user'],$GLOBALS['connection']['password']);
-    connect::selectDB('logondb');
+    $sql->select_db($GLOBALS['connection']['logondb']);
     if (isset($_POST['register']))
     {
         $username = trim($_POST['username']);
@@ -32,7 +32,7 @@
         $repeat_password = trim($_POST['password_repeat']);
         $captcha = (int)$_POST['captcha'];
         $raf = $_POST['raf'];
-        $account->register($username,$email,$password,$repeat_password,$captcha,$raf);
+        account::register($username,$email,$password,$repeat_password,$captcha,$raf);
         echo true;
     }
 
@@ -40,11 +40,12 @@
     {
         if($_POST['check'] == "username")
         {
-            $username = addslashes($_POST['value']);
+            $username = trim($_POST['value']);
             $result = $sql->query("SELECT * FROM account WHERE username='".$username."'");
-            if(!$result)
-            echo "<i class='green_text'>This username is available</i>";
+            $res_check = mysqli_fetch_assoc($result);
+            if($res_check == 0)
+                echo "<i class='green_text'>'".$username."' is available</i>";
             else
-            echo "<i class='red_text'>This username is not available</i>";
+                echo "<i class='red_text'>'".$username."' is not available</i>";
         }
     }

@@ -102,7 +102,7 @@ class account
 		exit();
 	}
 
-	public function register($username,$email,$password,$repeat_password,$captcha,$raf)
+	public static function register($username,$email,$password,$repeat_password,$captcha,$raf)
 	{
         global $sql;
 		$errors = array();
@@ -147,13 +147,14 @@ class account
 		$repeat_password = trim(strtoupper($repeat_password));
 		$raf = (int)$raf;
 
-        connect::selectDB('logondb');
+        $sql->select_db($GLOBALS['connection']['logondb']);
 
-		$result = $sql->query("SELECT COUNT(id) FROM account WHERE username='".$username."'");
-		if ($result)
-			$errors[] = 'The username already exists!';
+		$result = $sql->query("SELECT * FROM account WHERE username='".$username_clean."'");
+        $check_res = mysqli_fetch_assoc($result);
+		if ($check_res > 0)
+			$errors[] = $username_clean . " already exists!";
 		if ($password != $repeat_password)
-			$errors[] = 'The passwords does not match!';
+			$errors[] = "The passwords does not match!";
 
 		if (!empty($errors))
 		{
